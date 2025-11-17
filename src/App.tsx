@@ -16,6 +16,7 @@ import StudentDetails from "./pages/StudentDetails";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
+import ModuleForm from "./pages/ModuleForm";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/groups/:groupId/students/:studentId/edit" element={<EditStudent />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/groups/:id/modules/add" element={<ModuleForm />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
