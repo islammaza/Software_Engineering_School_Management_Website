@@ -42,7 +42,6 @@ const GroupDetails = () => {
     {
       id: 1,
       name: "عبد الرحمن بن صالح",
-      status: "ممتاز",
       statusColor: "bg-green-500",
       progress: [
         {
@@ -62,7 +61,6 @@ const GroupDetails = () => {
     {
       id: 2,
       name: "يوسف بن علي",
-      status: "جيد جداً",
       statusColor: "bg-blue-500",
       progress: [
         {
@@ -76,21 +74,18 @@ const GroupDetails = () => {
     {
       id: 3,
       name: "خالد بن أحمد",
-      status: "ممتاز",
       statusColor: "bg-green-500",
       progress: [],
     },
     {
       id: 4,
       name: "سليمان القريشي",
-      status: "جيد",
       statusColor: "bg-yellow-500",
       progress: [],
     },
     {
       id: 5,
       name: "عمر بن الخطاب",
-      status: "ضعيف",
       statusColor: "bg-red-500",
       progress: [],
     },
@@ -137,14 +132,14 @@ const GroupDetails = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-8 gap-y-6 gap-x-10 lg:gap-x-16 xl:gap-x-24">
           {/* Students List - Left Side (takes majority) */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-5">
             <div className="bg-card rounded-xl border border-border overflow-hidden">
               {/* Table Header */}
               <div className="grid grid-cols-12 gap-4 p-4 bg-muted/50 font-medium border-b border-border">
                 <div className="col-span-4">الاسم الكامل</div>
-                <div className="col-span-3">المستوى</div>
+                <div className="col-span-3" />
                 <div className="col-span-3 text-center">التفاصيل</div>
                 <div className="col-span-2 text-center">الإجراءات</div>
               </div>
@@ -157,11 +152,7 @@ const GroupDetails = () => {
                     className="grid grid-cols-12 gap-4 p-4 hover:bg-muted/30 transition-smooth"
                   >
                     <div className="col-span-4 font-medium">{student.name}</div>
-                    <div className="col-span-3">
-                      <Badge className={`${student.statusColor} text-white`}>
-                        {student.status}
-                      </Badge>
-                    </div>
+                    <div className="col-span-3" />
                     <div className="col-span-3 text-center">
                       <Button
                         variant="link"
@@ -200,7 +191,7 @@ const GroupDetails = () => {
           </div>
 
           {/* Modules List - Right Side */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-3">
             <Card className="p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold">قائمة الوحدات</h2>
@@ -234,9 +225,7 @@ const GroupDetails = () => {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() =>
-                            navigate(`/groups/${id}/modules/add`)
-                          }
+                          onClick={() => navigate(`/groups/${id}/modules/add`)}
                         >
                           <Edit className="w-3.5 h-3.5" />
                         </Button>
