@@ -123,8 +123,7 @@ const StudentDetails = () => {
           <div className="text-center flex-1">
             <h1 className="text-2xl font-bold mb-1">{student.name}</h1>
             <p className="text-sm text-muted-foreground">
-              المجموعة: حلقة القرآن  •  تقدم الحفظ: 4 جزء
-            </p>
+          المجموعة: حلقة القرآن </p>
           </div>
           
           <div className="w-10" /> {/* Spacer for centering */}
