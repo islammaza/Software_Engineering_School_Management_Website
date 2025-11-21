@@ -1,9 +1,15 @@
+// src/pages/Login.tsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+// مكوّن الزخرفة الإسلامية الذهبية
+const IslamicOrnament = () => (
+  <div className="w-full h-2 bg-gradient-to-r from-transparent via-primary to-transparent opacity-60 my-8" />
+);
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,40 +20,56 @@ const Login = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock login - in real app, this would call backend
+    // تسجيل دخول وهمي - في التطبيق الحقيقي سيتم استدعاء الباك إند
     navigate("/groups");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/5 to-background px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/5 via-background to-background px-4 py-12">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-            <BookOpen className="w-8 h-8 text-primary" />
+        
+        {/* الهيدر الإسلامي الجميل مع الحركة */}
+        <div className="text-center mb-10">
+          <div className="inline-block p-6 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 quran-glow animate-float mb-8 shadow-2xl">
+            <BookOpen className="w-20 h-20 text-primary" strokeWidth={1.5} />
           </div>
-          <h1 className="text-3xl font-bold mb-2">دار القرآن</h1>
-          <p className="text-muted-foreground">منصة إدارة مدارس تحفيظ القرآن</p>
+
+          <h1 className="text-6xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent mb-4">
+            دار القرآن
+          </h1>
+
+          <IslamicOrnament />
+
+          <p className="text-2xl text-muted-foreground font-medium leading-relaxed">
+            بِسْمِ اللهِ الرَّحْمَنِ الرَّحِيمِ
+          </p>
+          <p className="text-xl text-muted-foreground mt-3">
+            تسجيل الدخول إلى بوابة الخير والبركة
+          </p>
         </div>
 
-        <div className="bg-card p-8 rounded-xl border border-border shadow-lg">
-          <h2 className="text-2xl font-bold mb-6 text-center">تسجيل الدخول</h2>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
+        {/* بطاقة تسجيل الدخول الزجاجية */}
+        <div className="glass-card p-8 rounded-2xl border border-primary/20 shadow-2xl backdrop-blur-md">
+          <h2 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            مرحباً بك مرة أخرى
+          </h2>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
+              <Label htmlFor="email" className="text-lg">البريد الإلكتروني</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="example@email.com"
+                placeholder="example@darquran.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                className="text-right"
+                className="text-right text-lg h-12 border-primary/30 focus:border-primary transition-all"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">كلمة المرور</Label>
+              <Label htmlFor="password" className="text-lg">كلمة المرور</Label>
               <Input
                 id="password"
                 type="password"
@@ -55,28 +77,36 @@ const Login = () => {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
-                className="text-right"
+                className="text-right text-lg h- h-12 border-primary/30 focus:border-primary transition-all"
               />
             </div>
 
-            <Button type="submit" className="w-full" size="lg">
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full text-xl py-7 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90% text-white font-bold shadow-xl hover:shadow-2xl transition-all duration-500"
+            >
               تسجيل الدخول
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
+          <div className="mt-8 text-center">
+            <p className="text-muted-foreground">
               ليس لديك حساب؟{" "}
-              <Link to="/signup" className="text-primary hover:underline font-medium">
+              <Link to="/signup" className="text-primary font-bold hover:underline transition-all">
                 إنشاء حساب جديد
               </Link>
             </p>
           </div>
         </div>
 
-        <div className="mt-6 text-center">
-          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">
-            ← العودة للرئيسية
+        {/* العودة للرئيسية */}
+        <div className="mt-8 text-center">
+          <Link
+            to="/"
+            className="text-muted-foreground hover:text-primary transition-all text-lg flex items-center justify-center gap-2"
+          >
+            <span>←</span> العودة إلى الصفحة الرئيسية
           </Link>
         </div>
       </div>
