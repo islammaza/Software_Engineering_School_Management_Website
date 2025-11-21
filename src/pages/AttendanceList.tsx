@@ -1,12 +1,8 @@
-// src/pages/AttendanceList.tsx
 import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Plus, Save, X, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Plus, Save, X, CheckCircle2, XCircle, Clock, FileCheck2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { Card } from "@/components/ui/card";
 
 type Status = "present" | "late" | "absent" | "excused";
 
@@ -21,45 +17,34 @@ interface StudentAttendance {
   sessions: Status[];
 }
 
-const AttendanceList = () => {
-  const { toast } = useToast();
+const Attendance = () => {
   const [selectedGroup, setSelectedGroup] = useState("furqan");
   const [newSessionDate, setNewSessionDate] = useState("");
   const [editingCell, setEditingCell] = useState<{ studentId: number; sessionId: number } | null>(null);
   const [tempStatus, setTempStatus] = useState<Status>("present");
 
-  const groups = {
-    furqan: "مجموعة الفرقان",
-    noor: "مجموعة النور",
-    ihsan: "مجموعة الإحسان",
-  };
-
   const [sessions, setSessions] = useState<Session[]>([
-    { id: 1, date: "21 نوفمبر" },
-    { id: 2, date: "20 نوفمبر" },
-    { id: 3, date: "19 نوفمبر" },
-    { id: 4, date: "18 نوفمبر" },
-    { id: 5, date: "17 نوفمبر" },
-    { id: 6, date: "16 نوفمبر" },
-    { id: 7, date: "15 نوفمبر" },
-    { id: 8, date: "14 نوفمبر" },
-    { id: 9, date: "13 نوفمبر" },
-    { id: 10, date: "12 نوفمبر" },
+    { id: 1, date: "2025-11-21" },
+    { id: 2, date: "2025-11-20" },
+    { id: 3, date: "2025-11-19" },
+    { id: 4, date: "2025-11-18" },
+    { id: 5, date: "2025-11-17" },
+    { id: 6, date: "2025-11-16" },
   ]);
 
   const groupData: Record<string, StudentAttendance[]> = {
     furqan: [
-      { studentId: 1, studentName: "عبد الرحمن بن صالح", sessions: ["present","present","present","present","present","present","present","present","present","present"] },
-      { studentId: 2, studentName: "فاطمة الزهراء", sessions: ["present","present","present","present","present","present","present","present","present","present"] },
-      { studentId: 3, studentName: "يوسف بن علي", sessions: ["present","present","late","present","present","present","present","present","present","late"] },
-      { studentId: 4, studentName: "خديجة بنت محمد", sessions: ["present","present","present","present","present","present","present","present","present","present"] },
-      { studentId: 5, studentName: "عمر بن الخطاب", sessions: ["absent","present","present","late","present","present","present","present","absent","present"] },
+      { studentId: 1, studentName: "عبد الرحمن بن صالح", sessions: ["present","present","present","present","present","present"] },
+      { studentId: 2, studentName: "فاطمة الزهراء", sessions: ["present","present","present","present","present","present"] },
+      { studentId: 3, studentName: "يوسف بن علي", sessions: ["present","present","late","present","present","present"] },
+      { studentId: 4, studentName: "خديجة بنت محمد", sessions: ["present","present","present","present","present","present"] },
+      { studentId: 5, studentName: "عمر بن الخطاب", sessions: ["absent","present","present","late","present","present"] },
     ],
     noor: [
-      { studentId: 6, studentName: "زينب بنت جحش", sessions: ["present","present","present","present","present","present","present","present","present","present"] },
+      { studentId: 6, studentName: "زينب بنت جحش", sessions: ["present","present","present","present","present","present"] },
     ],
     ihsan: [
-      { studentId: 8, studentName: "سليمان القريشي", sessions: ["present","present","late","present","present","present","present","present","present","present"] },
+      { studentId: 8, studentName: "سليمان القريشي", sessions: ["present","present","late","present","present","present"] },
     ],
   };
 
@@ -76,7 +61,6 @@ const AttendanceList = () => {
     setSessions([newSession, ...sessions]);
     setData(prev => prev.map(s => ({ ...s, sessions: ["present", ...s.sessions] })));
     setNewSessionDate("");
-    toast({ title: "تمت الإضافة", description: `تم إضافة جلسة ${newSessionDate}` });
   };
 
   const handleEditCell = (studentId: number, sessionId: number, currentStatus: Status) => {
@@ -96,7 +80,6 @@ const AttendanceList = () => {
       )
     );
     setEditingCell(null);
-    toast({ title: "تم الحفظ", description: "تم تحديث حالة الحضور" });
   };
 
   const getStatusIcon = (status: Status) => {
@@ -104,121 +87,192 @@ const AttendanceList = () => {
       case "present": return <CheckCircle2 className="w-8 h-8 text-green-600" />;
       case "late": return <Clock className="w-8 h-8 text-amber-600" />;
       case "absent": return <XCircle className="w-8 h-8 text-red-600" />;
-      case "excused": return <Badge className="bg-purple-100 text-purple-700 px-4 py-2 text-sm font-bold">معذور</Badge>;
+      case "excused": return <span className="bg-purple-100 text-purple-700 px-3 py-1 text-xs font-bold rounded">معذور</span>;
       default: return null;
     }
   };
 
-  const calculateAttendanceRate = (sessions: Status[]) => {
-    const present = sessions.filter(s => s === "present" || s === "late").length;
-    return Math.round((present / sessions.length) * 100);
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("ar-EG", { weekday: 'short', month: 'short', day: 'numeric' });
   };
 
   return (
     <DashboardLayout>
-      {/* الهيرو + اختيار المجموعة + إضافة جلسة – ثابت تمامًا */}
-      <div className="sticky top-0 z-40 bg-white border-b border-border shadow-lg">
-        <div className="container mx-auto px-6 py-12 text-center">
-          <h1 className="text-6xl font-black text-gradient-durar mb-8">
-            سجل الحضور الكامل
-          </h1>
-          <Select value={selectedGroup} onValueChange={handleGroupChange}>
-            <SelectTrigger className="w-full max-w-md mx-auto text-2xl font-bold">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="furqan">مجموعة الفرقان</SelectItem>
-              <SelectItem value="noor">مجموعة النور</SelectItem>
-              <SelectItem value="ihsan">مجموعة الإحسان</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="w-full h-3 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-70 my-12" />
-          <div className="flex justify-center gap-4">
-            <Input
-              placeholder="أدخل تاريخ الجلسة الجديدة (مثال: 22 نوفمبر)"
-              value={newSessionDate}
-              onChange={(e) => setNewSessionDate(e.target.value)}
-              className="w-96 text-xl"
-            />
-            <Button onClick={handleAddSession} className="bg-primary hover:bg-primary/90 text-xl px-8">
-              <Plus className="w-6 h-6 ml-3" />
-              إضافة جلسة
-            </Button>
+      <div className="space-y-8 pb-16">
+        {/* Header Section */}
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-6">
+            <FileCheck2 className="w-10 h-10 text-primary" />
           </div>
+          <h1 className="text-5xl md:text-6xl font-black text-gradient-durar mb-4">
+            سجل الحضور والغياب
+          </h1>
+          <p className="text-2xl text-muted-foreground">
+            متابعة حضور الطلاب وتسجيل الغيابات
+          </p>
+          <div className="w-full h-2 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-70 my-8" />
         </div>
-      </div>
 
-      {/* الجدول – يتمرر لوحده فقط */}
-      <div className="flex-1 overflow-hidden bg-gray-50">
-        <div className="h-full overflow-auto">
-          <table className="w-full min-w-max">
-            <thead className="sticky top-0 bg-white border-b-2 border-primary z-20 shadow-md">
-              <tr>
-                <th className="text-right p-6 text-xl font-bold sticky left-0 bg-white z-30">الطالب</th>
-                {sessions.map((session) => (
-                  <th key={session.id} className="text-center p-6 text-lg font-bold min-w-32">
-                    {session.date}
+        {/* Controls Section */}
+        <Card className="glass-card p-8 card-glow">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+            <div>
+              <label className="block text-lg font-bold mb-2">اختر المجموعة</label>
+              <select 
+                value={selectedGroup} 
+                onChange={(e) => handleGroupChange(e.target.value)}
+                className="px-6 py-3 text-lg font-semibold border-2 border-primary rounded-xl bg-background transition-all hover:border-primary/70 focus:outline-none focus:ring-2 focus:ring-primary/30 min-w-[250px]"
+              >
+                <option value="furqan">مجموعة الفرقان</option>
+                <option value="noor">مجموعة النور</option>
+                <option value="ihsan">مجموعة الإحسان</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-lg font-bold mb-2">إضافة جلسة جديدة</label>
+              <div className="flex gap-3">
+                <input
+                  type="date"
+                  value={newSessionDate}
+                  onChange={(e) => setNewSessionDate(e.target.value)}
+                  className="px-4 py-3 text-base border-2 border-primary rounded-xl bg-background transition-all focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+                <Button 
+                  onClick={handleAddSession}
+                  disabled={!newSessionDate}
+                  size="lg"
+                  className="text-lg"
+                >
+                  <Plus className="w-5 h-5 ml-2" />
+                  إضافة جلسة
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Attendance Table */}
+        <Card className="glass-card overflow-hidden card-glow">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-primary/5 border-b-2 border-primary">
+                <tr>
+                  <th className="text-right p-6 text-xl font-bold min-w-[250px] sticky right-0 bg-primary/5 z-10">
+                    الطالب
                   </th>
-                ))}
-                <th className="text-center p-6 text-xl font-bold sticky right-0 bg-white z-30">
-                  المتوسط
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((student) => {
-                const rate = calculateAttendanceRate(student.sessions);
-                return (
-                  <tr key={student.studentId} className="border-b border-border/20 hover:bg-primary/5">
-                    <td className="p-6 text-lg text-right font-bold sticky left-0 bg-white z-20">
-                      {student.studentName}
-                    </td>
-                    {student.sessions.map((status, index) => (
-                      <td key={index} className="p-4 text-center">
-                        {editingCell?.studentId === student.studentId && editingCell?.sessionId === index + 1 ? (
-                          <div className="flex justify-center items-center gap-2">
-                            <Select value={tempStatus} onValueChange={(v) => setTempStatus(v as Status)}>
-                              <SelectTrigger className="w-32">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="present">حاضر</SelectItem>
-                                <SelectItem value="late">متأخر</SelectItem>
-                                <SelectItem value="absent">غائب</SelectItem>
-                                <SelectItem value="excused">معذور</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <Button size="icon" onClick={() => handleSaveCell(student.studentId, index + 1)} className="bg-green-600 hover:bg-green-700">
-                              <Save className="w-4 h-4" />
-                            </Button>
-                            <Button size="icon" variant="outline" onClick={() => setEditingCell(null)}>
-                              <X className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <div
-                            className="cursor-pointer p-3 rounded-lg hover:bg-primary/10 transition-all"
-                            onClick={() => handleEditCell(student.studentId, index + 1, status)}
-                          >
-                            {getStatusIcon(status)}
-                          </div>
-                        )}
+                  {sessions.map((session) => (
+                    <th key={session.id} className="text-center p-4 text-base font-bold min-w-[140px]">
+                      <span className="text-sm block mb-1">{formatDate(session.date)}</span>
+                    </th>
+                  ))}
+                  <th className="text-center p-6 text-xl font-bold min-w-[150px] sticky left-0 bg-primary/5 z-10">
+                    معدل الحضور
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((student, studentIndex) => {
+                  const presentCount = student.sessions.filter(s => s === "present" || s === "late").length;
+                  const totalSessions = student.sessions.length;
+                  const rate = totalSessions > 0 ? Math.round((presentCount / totalSessions) * 100) : 0;
+                  
+                  return (
+                    <tr 
+                      key={student.studentId} 
+                      className={`border-b border-border/50 hover:bg-primary/5 transition-colors ${
+                        studentIndex % 2 === 0 ? 'bg-muted/20' : ''
+                      }`}
+                    >
+                      <td className="p-6 text-xl font-bold text-right sticky right-0 bg-background z-10">
+                        {student.studentName}
                       </td>
-                    ))}
-                    <td className="p-6 text-center sticky right-0 bg-white z-20">
-                      <span className={`text-3xl font-black ${rate >= 95 ? "text-green-600" : rate >= 80 ? "text-amber-600" : "text-red-600"}`}>
-                        {rate}%
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      {student.sessions.map((status, index) => (
+                        <td key={index} className="p-3 text-center">
+                          {editingCell?.studentId === student.studentId && editingCell?.sessionId === index + 1 ? (
+                            <div className="flex justify-center items-center gap-2">
+                              <select 
+                                value={tempStatus} 
+                                onChange={(e) => setTempStatus(e.target.value as Status)}
+                                className="px-3 py-2 text-sm border-2 border-primary rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                              >
+                                <option value="present">حاضر</option>
+                                <option value="late">متأخر</option>
+                                <option value="absent">غائب</option>
+                                <option value="excused">معذور</option>
+                              </select>
+                              <button 
+                                onClick={() => handleSaveCell(student.studentId, index + 1)}
+                                className="bg-primary hover:bg-primary/90 text-white h-9 w-9 p-0 rounded-lg flex items-center justify-center transition-all"
+                              >
+                                <Save className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => setEditingCell(null)}
+                                className="h-9 w-9 p-0 border-2 border-border rounded-lg hover:bg-muted flex items-center justify-center transition-all"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div
+                              className="cursor-pointer p-3 rounded-xl hover:bg-primary/10 transition-all inline-flex justify-center"
+                              onClick={() => handleEditCell(student.studentId, index + 1, status)}
+                              title={`انقر للتعديل: ${status}`}
+                            >
+                              {getStatusIcon(status)}
+                            </div>
+                          )}
+                        </td>
+                      ))}
+                      <td className="p-6 text-center sticky left-0 bg-background z-10">
+                        <div className="text-center">
+                          <span className={`text-4xl font-black ${
+                            rate >= 95 ? "text-green-600" : 
+                            rate >= 80 ? "text-amber-600" : 
+                            "text-red-600"
+                          }`}>
+                            {rate}%
+                          </span>
+                          <p className="text-sm text-muted-foreground font-bold mt-2">
+                            {presentCount}/{totalSessions} جلسة
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+
+        {/* Legend */}
+        <Card className="glass-card p-8">
+          <h3 className="text-2xl font-bold mb-6 text-center">دليل الرموز</h3>
+          <div className="flex flex-wrap justify-center gap-8">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="w-8 h-8 text-green-600" />
+              <span className="text-lg font-bold">حاضر</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Clock className="w-8 h-8 text-amber-600" />
+              <span className="text-lg font-bold">متأخر</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <XCircle className="w-8 h-8 text-red-600" />
+              <span className="text-lg font-bold">غائب</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="bg-purple-100 text-purple-700 px-4 py-2 text-sm font-bold rounded-lg">معذور</span>
+              <span className="text-lg font-bold">معذور</span>
+            </div>
+          </div>
+        </Card>
       </div>
     </DashboardLayout>
   );
 };
 
-export default AttendanceList;
+export default Attendance;
