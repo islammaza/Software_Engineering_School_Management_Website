@@ -114,8 +114,8 @@ const Landing = () => {
         </div>
       </section>
 
-      <footer className="py-12 text-center border-t border-border/30 bg-gradient-to-t from-primary/5 to-transparent">
-        <p className="text-lg text-muted-foreground">
+      <footer className="py-6 md:py-12 text-center border-t border-border/30 bg-gradient-to-t from-primary/5 to-transparent px-4">
+        <p className="text-xs md:text-lg text-muted-foreground">
           © 2025 دار القرآن الكريم • جزاكم الله خيرًا وبارك في جهودكم
         </p>
       </footer>
