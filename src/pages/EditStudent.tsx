@@ -52,25 +52,7 @@ const EditStudent = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="status">المستوى</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value) => setFormData({ ...formData, status: value })}
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ممتاز">ممتاز</SelectItem>
-                  <SelectItem value="جيد جداً">جيد جداً</SelectItem>
-                  <SelectItem value="جيد">جيد</SelectItem>
-                  <SelectItem value="مقبول">مقبول</SelectItem>
-                  <SelectItem value="ضعيف">ضعيف</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            
 
             <div className="flex gap-4 pt-4">
               <Button type="submit" className="flex-1">
