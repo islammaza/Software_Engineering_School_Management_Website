@@ -16,7 +16,8 @@ import StudentDetails from "./pages/StudentDetails";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
-import AttendanceList from "./pages/AttendanceList";
+import ModuleDetails from "./pages/ModuleDetails";
+
 
 import ModuleForm from "./pages/ModuleForm";
 
@@ -39,9 +40,9 @@ const App = () => (
           <Route path="/groups/:groupId/students/add" element={<AddStudent />} />
           <Route path="/groups/:groupId/students/:studentId" element={<StudentDetails />} />
           <Route path="/groups/:groupId/students/:studentId/edit" element={<EditStudent />} />
+          <Route path="/groups/:id/modules/:moduleId" element={<ModuleDetails />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/attendance" element={<AttendanceList />} />
           <Route path="/groups/:id/modules/add" element={<ModuleForm />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

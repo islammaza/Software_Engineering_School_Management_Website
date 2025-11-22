@@ -27,8 +27,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   const navItems = [
     { icon: LayoutDashboard, label: "لوحة التحكم", path: "/dashboard" },
-    { icon: Users,           label: "الحلقات والمجموعات", path: "/groups" },
-    { icon: FileCheck2,      label: "الحضور والغياب", path: "/attendance" },
+    { icon: Users,           label: "المجموعات", path: "/groups" },
     { icon: Settings,        label: "الإعدادات", path: "/settings" },
   ];
 
