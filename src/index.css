@@ -1,119 +1,251 @@
+/* ===================================================== */
+/*  دار القرآن – تصميم مستوحى من Durar School 2025      */
+/*  خطوط واضحة جدًا + ألوان فاخرة + توافق كامل مع RTL   */
+/* ===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
-
+/* ====================== الألوان الرسمية (مثل Durar بالضبط) ====================== */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 48 100% 98%;           /* كريمي فاتح فاخر */
+    --foreground: 210 40% 10%;           /* أسود داكن واضح جدًا */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 10%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 142 70% 45%;
+    --primary: 162 80% 38%;              /* أخضر زمردي فاخر – نفس Durar */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 142 30% 95%;
-    --secondary-foreground: 142 70% 25%;
+    --secondary: 48 100% 50%;            /* ذهبي لامع قوي */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 280 65% 55%;               /* بنفسجي ملكي ناعم */
+    --accent-foreground: 0 0% 100%;
 
-    --accent: 142 50% 90%;
-    --accent-foreground: 142 70% 25%;
+    --muted: 48 40% 94%;
+    --muted-foreground: 210 20% 40%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --border: 48 50% 88%;
+    --input: 48 50% 88%;
+    --ring: 162 80% 38%;
+    --radius: 1.5rem;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 142 70% 45%;
-
-    --radius: 0.75rem;
-    
-    --success: 142 70% 45%;
-    --warning: 45 93% 47%;
-    --info: 217 91% 60%;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* ألوان مخصصة */
+    --gold: 48 100% 50%;
+    --durar-green: 162 80% 38%;
+    --durar-cream: 48 100% 98%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 210 30% 8%;
+    --foreground: 48 100% 95%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 210 30% 12%;
+    --card-foreground: 48 100% 95%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 142 70% 45%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 142 70% 45%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --primary: 162 85% 45%;
+    --secondary: 48 100% 65%;
   }
 }
 
+/* ====================== الخطوط والإعدادات العامة (واضحة 100%) ====================== */
 @layer base {
-  * {
+  *, *::before, *::after {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+    @apply bg-[hsl(var(--durar-cream))] text-foreground min-h-screen;
+    font-family: 'Tajawal', 'Cairo', sans-serif;
+    font-weight: 600;
+    line-height: 1.7;
     direction: rtl;
+    background-image: 
+      radial-gradient(circle at 15% 85%, hsl(162,80%,90%,0.1) 0%, transparent 50%),
+      radial-gradient(circle at 85% 15%, hsl(48,100%,92%,0.12) 0%, transparent 50%);
+    background-attachment: fixed;
   }
 
-  html {
-    direction: rtl;
+  /* كل العناوين واضحة جدًا مثل Durar */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+  }
+
+  /* النصوص العادية واضحة وقوية */
+  p, span, div, button, input, label {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 600;
   }
 }
 
+/* ====================== كلاسات فاخرة مثل Durar ====================== */
 @layer utilities {
   .transition-smooth {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid hsl(var(--gold)/0.35);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border-radius: 1.5rem;
+  }
+
+  .dark .glass-card {
+    background: rgba(20, 25, 35, 0.85);
+    border-color: hsl(var(--durar-green)/0.5);
+  }
+
+  .card-glow {
+    transition: all 0.5s ease;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  }
+
+  .card-glow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  /* تدرجات نصوص فاخرة */
+  .text-gradient-durar {
+    background: linear-gradient(90deg, hsl(var(--durar-green)), hsl(var(--gold)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 900;
+  }
+
+  .text-gradient-title {
+    background: linear-gradient(90deg, hsl(var(--durar-green)), hsl(var(--gold)), hsl(var(--accent)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 900;
+  }
+
+  /* توهج ذهبي ناعم */
+  .gold-glow {
+    box-shadow: 0 0 0 60px hsl(var(--gold)/0.5);
+  }
+
+  /* حركة طفو ناعمة */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+  .animate-float {
+    animation: float 7s ease-in-out infinite;
+  }
+
+  /* ====================== Sidebar Active State Styling ====================== */
+  .sidebar-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.5rem 2rem;
+    border-radius: 1.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    transition: all 0.3s ease;
+  }
+
+  /* Inactive state */
+  .sidebar-nav-link:not(.active) {
+    color: hsl(var(--foreground));
+  }
+
+  .sidebar-nav-link:not(.active):hover {
+    background-color: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+    transform: translateX(-0.5rem);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Active state with smooth hover effects */
+  .sidebar-nav-link.active {
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--gold)));
+    color: white;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .sidebar-nav-link.active:hover {
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05) translateX(-0.25rem);
+  }
+
+  .sidebar-nav-link.active:active {
+    transform: scale(1);
+  }
+
+  /* Icon styling */
+  .sidebar-nav-link svg {
+    width: 2rem;
+    height: 2rem;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-nav-link.active svg {
+    color: white;
+  }
+
+  .sidebar-nav-link:not(.active) svg {
+    color: hsl(var(--primary));
+  }
+
+  .sidebar-nav-link:not(.active):hover svg,
+  .sidebar-nav-link.active:hover svg {
+    transform: scale(1.1);
+  }
+
+  /* ====================== Custom Hover Scale Classes ====================== */
+  .hover\:scale-102:hover {
+    transform: scale(1.02);
+  }
+
+  .group-hover\:scale-105 {
+    transform: scale(1);
+  }
+
+  .group:hover .group-hover\:scale-105 {
+    transform: scale(1.05);
+  }
+
+  /* ====================== Responsive Utilities ====================== */
+  /* Mobile-first responsive text sizes */
+  @media (max-width: 640px) {
+    body {
+      font-size: 14px;
+    }
+  }
+
+  /* Ensure images scale properly */
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* Mobile-friendly inputs and buttons */
+  input, select, textarea, button {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  /* Better spacing on small screens */
+  @media (max-width: 768px) {
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
   }
 }
+

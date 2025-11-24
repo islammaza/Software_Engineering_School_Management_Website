@@ -15,7 +15,6 @@ const EditGroup = () => {
     name: "مجموعة الفرقان",
     teacher: "أحمد محمود",
     time: "السبت - الخميس",
-    price: "5.00 ر.س",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -69,16 +68,6 @@ const EditGroup = () => {
                 id="time"
                 value={formData.time}
                 onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="price">السعر</Label>
-              <Input
-                id="price"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 required
               />
             </div>
