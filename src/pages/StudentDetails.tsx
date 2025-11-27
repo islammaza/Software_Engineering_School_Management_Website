@@ -1,339 +1,270 @@
+// src/pages/StudentDetails.tsx
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { X, Plus, Edit, FileDown } from "lucide-react";
+import DashboardLayout from "@/components/DashboardLayout";
+import { FileDown, ArrowLeft, Save, X, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+
+interface Module {
+  id: number;
+  name: string;
+  progress: string;
+  grade: number;
+  remark: string;
+}
 
 const StudentDetails = () => {
   const navigate = useNavigate();
-  const { groupId, studentId } = useParams();
+  const { groupId } = useParams();
   const { toast } = useToast();
-  
-  const [student] = useState({
-    id: studentId,
+
+  const student = {
     name: "عبدالله بن محمد",
-    generalNotes: "أضف ملاحظة عامة عن أداء الطالب...",
-    progress: [
-      { 
-        id: 1,
-        unit: "سورة البقرة", 
-        progress: "3/4 جزء", 
-        date: "2023-10-27", 
-        notes: "أداء جيد يحتاج لمراجعة المتشابهات",
-        progressBar: 75
-      },
-      { 
-        id: 2,
-        unit: "التجويد", 
-        progress: "85/100", 
-        date: "2023-10-25", 
-        notes: "ممتاز في أحكام النون الساكنة",
-        progressBar: 85
-      },
-      { 
-        id: 3,
-        unit: "سورة آل عمران", 
-        progress: "1/2 جزء", 
-        date: "2023-11-05", 
-        notes: "يحتاج موضعة",
-        progressBar: 50
-      },
-    ],
-  });
+    group: "مجموعة الفرقان",
+    teacher: "أحمد محمود",
+    date: new Date().toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" }),
+  };
 
-  const [editingNote, setEditingNote] = useState<number | null>(null);
+  const [modules, setModules] = useState<Module[]>([
+    { id: 1, name: "سورة البقرة", progress: "3/4 جزء", grade: 95, remark: "أداء ممتاز في المتشابهات، يحتاج مراجعة بسيطة" },
+    { id: 2, name: "التجويد", progress: "ممتاز", grade: 98, remark: "متمكن من أحكام النون والميم والمدود" },
+    { id: 3, name: "سورة آل عمران", progress: "1/2 جزء", grade: 80, remark: "يحتاج تركيز أكثر في الحفظ الجديد" },
+    { id: 4, name: "مراجعة الجزء 30", progress: "كامل", grade: 100, remark: "مراجعة يومية مستمرة، ممتاز" },
+    { id: 5, name: "الانضباط والسلوك", progress: "ممتاز", grade: 97, remark: "ملتزم، محترم، يساعد زملاءه" },
+  ]);
+
+  // ملاحظة الأستاذ العامة – قابلة للتعديل
+  const [generalRemark, setGeneralRemark] = useState(
+    "طالب مجتهد جدًا، يتمتع بأخلاق عالية وصوت جميل في التلاوة، يحتاج فقط إلى الاستمرارية في المراجعة ليصل إلى درجة الإتقان الكامل إن شاء الله."
+  );
   const [editingGeneral, setEditingGeneral] = useState(false);
-  const [addingProgress, setAddingProgress] = useState(false);
-  const [generalNotes, setGeneralNotes] = useState(student.generalNotes);
-  const [editedNoteData, setEditedNoteData] = useState({
-    unit: "",
-    progress: "",
-    date: "",
-    notes: "",
-  });
+  const [tempGeneralRemark, setTempGeneralRemark] = useState(generalRemark);
 
-  const [newProgress, setNewProgress] = useState({
-    unit: "",
-    progress: "",
-    date: "",
-    notes: "",
-  });
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [tempGrade, setTempGrade] = useState("");
+  const [tempRemark, setTempRemark] = useState("");
 
-  const calculateAverage = () => {
-    const total = student.progress.reduce((sum, item) => {
-      if (item.progress.includes("/")) {
-        const [current, max] = item.progress.split("/").map(n => parseInt(n.trim()));
-        return sum + (current / max) * 100;
-      }
-      return sum + parseInt(item.progress);
-    }, 0);
-    return Math.round(total / student.progress.length);
+  const finalAverage = Math.round(modules.reduce((sum, m) => sum + m.grade, 0) / modules.length);
+
+  const handleEdit = (id: number, grade: number, remark: string) => {
+    setEditingId(id);
+    setTempGrade(grade.toString());
+    setTempRemark(remark);
   };
 
-  const handleSaveGeneralNotes = () => {
-    toast({
-      title: "تم الحفظ",
-      description: "تم حفظ الملاحظات العامة بنجاح",
-    });
+  const handleSave = (id: number) => {
+    const grade = parseInt(tempGrade);
+    if (isNaN(grade) || grade < 0 || grade > 100) {
+      toast({ title: "خطأ", description: "الدرجة يجب أن تكون بين 0 و100" });
+      return;
+    }
+
+    setModules(prev =>
+      prev.map(m => (m.id === id ? { ...m, grade, remark: tempRemark } : m))
+    );
+
+    setEditingId(null);
+    setTempGrade("");
+    setTempRemark("");
+    toast({ title: "تم الحفظ", description: "تم تحديث تقييم الوحدة بنجاح" });
+  };
+
+  const handleSaveGeneralRemark = () => {
+    setGeneralRemark(tempGeneralRemark);
     setEditingGeneral(false);
-  };
-
-  const handleAddProgress = () => {
-    toast({
-      title: "تم الإضافة",
-      description: "تمت إضافة ملاحظة جديدة بنجاح",
-    });
-    setAddingProgress(false);
-    setNewProgress({ unit: "", progress: "", date: "", notes: "" });
-  };
-
-  const handleSaveEdit = () => {
-    toast({
-      title: "تم الحفظ",
-      description: "تم حفظ التعديلات بنجاح",
-    });
-    setEditingNote(null);
+    toast({ title: "تم الحفظ", description: "تم تحديث ملاحظة الأستاذ بنجاح" });
   };
 
   const handleExportPDF = () => {
-    toast({
-      title: "تصدير PDF",
-      description: "جاري تصدير البيانات إلى PDF...",
-    });
+    toast({ title: "تم التصدير", description: "تقرير الطالب عبدالله بن محمد جاهز للطباعة" });
   };
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-card rounded-2xl border border-border shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(`/groups/${groupId}`)}
-            className="rounded-full"
-          >
-            <X className="w-5 h-5" />
-          </Button>
-          
-          <div className="text-center flex-1">
-            <h1 className="text-2xl font-bold mb-1">{student.name}</h1>
-            <p className="text-sm text-muted-foreground">
-          المجموعة: حلقة القرآن </p>
-          </div>
-          
-          <div className="w-10" /> {/* Spacer for centering */}
-        </div>
+    <DashboardLayout>
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-white py-8 px-4">
+        <div className="max-w-4xl mx-auto">
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {/* Add Progress Form */}
-          {addingProgress && (
-            <div className="bg-secondary/30 p-6 rounded-lg space-y-4 mb-6">
-              <h3 className="font-bold">إضافة ملاحظة جديدة</h3>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>الوحدة</Label>
-                  <Input
-                    value={newProgress.unit}
-                    onChange={(e) => setNewProgress({ ...newProgress, unit: e.target.value })}
-                    placeholder="مثال: سورة البقرة"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>التقدم</Label>
-                  <Input
-                    value={newProgress.progress}
-                    onChange={(e) => setNewProgress({ ...newProgress, progress: e.target.value })}
-                    placeholder="مثال: 3/5 جزء"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>التاريخ</Label>
-                  <Input
-                    type="date"
-                    value={newProgress.date}
-                    onChange={(e) => setNewProgress({ ...newProgress, date: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>الملاحظات</Label>
-                  <Textarea
-                    value={newProgress.notes}
-                    onChange={(e) => setNewProgress({ ...newProgress, notes: e.target.value })}
-                    rows={3}
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button onClick={handleAddProgress}>حفظ</Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setAddingProgress(false);
-                      setNewProgress({ unit: "", progress: "", date: "", notes: "" });
-                    }}
-                  >
-                    إلغاء
-                  </Button>
-                </div>
+          {/* زر الرجوع */}
+          <div className="mb-6">
+            <Button
+              onClick={() => navigate(`/groups/${groupId}`)}
+              variant="outline"
+              className="border-primary text-primary hover:bg-primary hover:text-white text-lg px-8 py-5"
+            >
+              <ArrowLeft className="w-5 h-5 ml-2" />
+              رجوع إلى قائمة الطلاب
+            </Button>
+          </div>
+
+          {/* التقرير الرسمي */}
+          <div className="bg-white rounded-2xl shadow-xl border-2 border-double border-[var(--gold)] p-8">
+
+            {/* رأس التقرير */}
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-black text-gradient-durar mb-6">تقرير أداء الطالب</h1>
+              <div className="w-full h-2 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-80 mb-8" />
+              
+              <div className="grid grid-cols-2 gap-6 text-right text-lg font-bold">
+                <div><p className="text-muted-foreground">اسم الطالب</p><p className="text-2xl text-primary mt-1">{student.name}</p></div>
+                <div><p className="text-muted-foreground">المجموعة</p><p className="text-2xl text-primary mt-1">{student.group}</p></div>
+                <div><p className="text-muted-foreground">التاريخ</p><p className="text-xl text-primary mt-1">{student.date}</p></div>
+                <div><p className="text-muted-foreground">الأستاذ</p><p className="text-xl text-primary mt-1">{student.teacher}</p></div>
               </div>
             </div>
-          )}
 
-          {/* Progress Table */}
-          <div className="bg-secondary/10 rounded-xl overflow-hidden mb-6">
-            {/* Table Header */}
-            <div className="grid grid-cols-4 gap-4 p-4 bg-secondary/30 font-semibold text-sm">
-              <div className="text-center">تاريخ آخر تقييم</div>
-              <div className="text-center">ملاحظة</div>
-              <div className="text-center">الدرجة / الحزب المسجل</div>
-              <div className="text-center">اسم الوحدة</div>
-            </div>
+            {/* جدول التقييم */}
+            <div className="bg-gradient-to-r from-primary/5 to-[var(--gold)]/5 rounded-2xl p-6 border border-primary/20 mb-8">
+              <h2 className="text-3xl font-black text-center text-gradient-durar mb-6">
+                تقييم الوحدات الدراسية
+              </h2>
 
-            {/* Table Rows */}
-            {student.progress.map((item) => (
-              <div key={item.id}>
-                {editingNote === item.id ? (
-                  <div className="p-6 border-t border-border bg-background space-y-4">
-                    <div className="space-y-2">
-                      <Label>الوحدة</Label>
-                      <Input 
-                        defaultValue={item.unit}
-                        onChange={(e) => setEditedNoteData({ ...editedNoteData, unit: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>التقدم</Label>
-                      <Input 
-                        defaultValue={item.progress}
-                        onChange={(e) => setEditedNoteData({ ...editedNoteData, progress: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>التاريخ</Label>
-                      <Input 
-                        type="date" 
-                        defaultValue={item.date}
-                        onChange={(e) => setEditedNoteData({ ...editedNoteData, date: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>الملاحظات</Label>
-                      <Textarea 
-                        defaultValue={item.notes} 
-                        rows={3}
-                        onChange={(e) => setEditedNoteData({ ...editedNoteData, notes: e.target.value })}
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <Button onClick={handleSaveEdit}>حفظ</Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setEditingNote(null)}
-                      >
-                        إلغاء
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-4 gap-4 p-4 border-t border-border hover:bg-secondary/5 transition-colors group">
-                    <div className="text-center text-sm text-muted-foreground flex items-center justify-center">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity ml-2"
-                        onClick={() => setEditingNote(item.id)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      {item.date}
-                    </div>
-                    <div className="text-center text-sm text-muted-foreground flex items-center justify-center">
-                      {item.notes}
-                    </div>
-                    <div className="flex items-center justify-center">
-                      <div className="w-full max-w-[120px] space-y-1">
-                        <div className="text-sm font-medium text-center">{item.progress}</div>
-                        <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-primary transition-all duration-500"
-                            style={{ width: `${item.progressBar}%` }}
+              <div className="space-y-5">
+                {modules.map((module) => (
+                  <div key={module.id} className="bg-white rounded-xl shadow p-5 border border-border/30">
+                    <div className="grid grid-cols-3 gap-4 items-center text-right">
+                      <div>
+                        <h3 className="text-xl font-black text-primary">{module.name}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">{module.progress}</p>
+                      </div>
+
+                      <div className="text-center">
+                        {editingId === module.id ? (
+                          <Input
+                            type="number"
+                            value={tempGrade}
+                            onChange={(e) => setTempGrade(e.target.value)}
+                            className="w-24 text-3xl font-black text-center"
+                            placeholder="0-100"
                           />
-                        </div>
+                        ) : (
+                          <p className="text-5xl font-black text-primary">{module.grade}</p>
+                        )}
+                        <p className="text-sm text-muted-foreground">من 100</p>
+                      </div>
+
+                      <div className="text-right">
+                        {editingId === module.id ? (
+                          <div className="space-y-3">
+                            <Textarea
+                              value={tempRemark}
+                              onChange={(e) => setTempRemark(e.target.value)}
+                              rows={3}
+                              className="text-right text-sm"
+                              placeholder="ملاحظة الأستاذ..."
+                            />
+                            <div className="flex justify-end gap-2">
+                              <Button size="sm" onClick={() => handleSave(module.id)} className="bg-green-600 hover:bg-green-700">
+                                <Save className="w-4 h-4 ml-1" />
+                                حفظ
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>
+                                <X className="w-4 h-4" />
+                                إلغاء
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <p className="text-sm leading-relaxed text-muted-foreground italic">
+                              {module.remark}
+                            </p>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="mt-3 text-primary hover:text-[var(--gold)]"
+                              onClick={() => handleEdit(module.id, module.grade, module.remark)}
+                            >
+                              <Edit className="w-4 h-4 ml-1" />
+                              تعديل
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <div className="text-center font-medium flex items-center justify-center">
-                      {item.unit}
-                    </div>
                   </div>
-                )}
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
 
-          {/* General Notes Section */}
-          <div className="space-y-4">
-            <h3 className="font-bold text-right">ملاحظة عامة</h3>
-            {editingGeneral ? (
-              <div className="space-y-4">
-                <Textarea
-                  value={generalNotes}
-                  onChange={(e) => setGeneralNotes(e.target.value)}
-                  rows={4}
-                  className="w-full"
-                />
-                <div className="flex gap-2">
-                  <Button onClick={handleSaveGeneralNotes}>حفظ</Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setGeneralNotes(student.generalNotes);
+            {/* المتوسط العام */}
+            <div className="text-center mb-10">
+              <div className="inline-block bg-gray-100 rounded-2xl px-16 py-10 shadow-xl border border-gray-300">
+                <p className="text-2xl font-bold text-gray-800 mb-3">المعدل النهائي</p>
+                <p className="text-7xl font-black text-gray-900">{finalAverage}</p>
+                <p className="text-xl text-gray-600 mt-2">من 100</p>
+              </div>
+            </div>
+
+            {/* ملاحظة الأستاذ العامة – قابلة للتعديل */}
+            <div className="bg-gradient-to-r from-primary/5 to-[var(--gold)]/5 rounded-2xl p-6 border border-primary/20 mb-10">
+              <h3 className="text-2xl font-black text-center text-gradient-durar mb-5">
+                ملاحظة الأستاذ المشرف
+              </h3>
+
+              {editingGeneral ? (
+                <div className="bg-white rounded-xl p-8 shadow space-y-4">
+                  <Textarea
+                    value={tempGeneralRemark}
+                    onChange={(e) => setTempGeneralRemark(e.target.value)}
+                    rows={6}
+                    className="text-right text-lg leading-relaxed"
+                    placeholder="اكتب ملاحظتك العامة عن الطالب..."
+                  />
+                  <div className="flex justify-end gap-3">
+                    <Button onClick={handleSaveGeneralRemark} className="bg-green-600 hover:bg-green-700">
+                      <Save className="w-5 h-5 ml-2" />
+                      حفظ الملاحظة
+                    </Button>
+                    <Button variant="outline" onClick={() => {
+                      setTempGeneralRemark(generalRemark);
                       setEditingGeneral(false);
-                    }}
-                  >
-                    إلغاء
+                    }}>
+                      <X className="w-5 h-5" />
+                      إلغاء
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white rounded-xl p-8 shadow cursor-pointer hover:shadow-xl transition-all border border-primary/10"
+                  onClick={() => {
+                    setTempGeneralRemark(generalRemark);
+                    setEditingGeneral(true);
+                  }}
+                >
+                  <p className="text-lg text-right leading-relaxed text-foreground">
+                    {generalRemark || "اضغط هنا لإضافة ملاحظة عامة عن الطالب..."}
+                  </p>
+                  <Button size="sm" variant="ghost" className="mt-4 text-primary hover:text-[var(--gold)]">
+                    <Edit className="w-4 h-4 ml-2" />
+                    تعديل الملاحظة
                   </Button>
                 </div>
-              </div>
-            ) : (
-              <div 
-                className="bg-secondary/10 p-4 rounded-lg text-sm text-muted-foreground text-right cursor-pointer hover:bg-secondary/20 transition-colors"
-                onClick={() => setEditingGeneral(true)}
-              >
-                {generalNotes}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-border bg-secondary/5">
-          <Button
-            variant="outline"
-            className="flex items-center gap-2"
-            onClick={handleExportPDF}
-          >
-            <FileDown className="w-4 h-4" />
-            تصدير PDF
-          </Button>
-
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold">المتوسط</span>
-              <span className="text-2xl font-bold">{calculateAverage()}/100</span>
+              )}
             </div>
-            <Button  className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              حساب المتوسط
-            </Button>
+
+            {/* زر التصدير */}
+            <div className="flex justify-center">
+              <Button size="lg" onClick={handleExportPDF} className="bg-gradient-to-r from-primary to-[var(--gold)] text-white text-2xl px-20 py-8 shadow-xl">
+                <FileDown className="w-8 h-8 ml-4" />
+                تصدير التقرير كـ PDF
+              </Button>
+            </div>
+
+            {/* آية */}
+            <div className="text-center mt-16">
+              <div className="w-full h-2 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-80 my-10" />
+              <p className="text-3xl font-amiri italic text-gradient-durar leading-relaxed max-w-4xl mx-auto">
+                "فَمَنْ يَعْمَلْ مِثْقَالَ ذَرَّةٍ خَيْرًا يَرَهُ ۖ وَمَنْ يَعْمَلْ مِثْقَالَ ذَرَّةٍ شَرًّا يَرَهُ"
+              </p>
+              <p className="text-lg text-muted-foreground mt-6">سورة الزلزلة</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
