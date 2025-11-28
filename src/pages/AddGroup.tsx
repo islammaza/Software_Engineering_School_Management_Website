@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/database/supabaseClient";
 
 const AddGroup = () => {
   const navigate = useNavigate();
@@ -15,13 +16,25 @@ const AddGroup = () => {
     time: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "تم إضافة المجموعة",
-      description: "تمت إضافة المجموعة بنجاح",
-    });
-    navigate("/groups");
+    try {
+      const { error } = await supabase.from("groups").insert([
+        {
+          name: formData.name,
+          professor_name: formData.teacher,
+          timing: formData.time,
+        },
+      ]);
+      if (error) throw error;
+      toast({
+        title: "تم إضافة المجموعة",
+        description: "تمت إضافة المجموعة بنجاح",
+      });
+      navigate("/groups");
+    } catch (err: any) {
+      toast({ title: "حدث خطأ", description: err.message });
+    }
   };
 
   return (
@@ -36,16 +49,17 @@ const AddGroup = () => {
           <span>رجوع</span>
         </Button>
 
-        <div className="bg-card rounded-xl border border-border p-8">
+        <div className="bg-card rounded-xl border p-8">
           <h1 className="text-3xl font-bold mb-6">إضافة مجموعة جديدة</h1>
-
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="name">اسم المجموعة</Label>
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 placeholder="مثال: مجموعة الفرقان"
                 required
               />
@@ -56,7 +70,9 @@ const AddGroup = () => {
               <Input
                 id="teacher"
                 value={formData.teacher}
-                onChange={(e) => setFormData({ ...formData, teacher: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, teacher: e.target.value })
+                }
                 placeholder="مثال: أحمد محمود"
                 required
               />
@@ -67,7 +83,9 @@ const AddGroup = () => {
               <Input
                 id="time"
                 value={formData.time}
-                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, time: e.target.value })
+                }
                 placeholder="مثال: السبت - الخميس"
                 required
               />

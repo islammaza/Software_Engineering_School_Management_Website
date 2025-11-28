@@ -1,29 +1,50 @@
-import { useState } from "react";
+// src/pages/EditGroup.tsx
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/database/supabaseClient";
+
 const EditGroup = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { toast } = useToast();
-  
-  const [formData, setFormData] = useState({
-    name: "مجموعة الفرقان",
-    teacher: "أحمد محمود",
-    time: "السبت - الخميس",
-  });
+  const [formData, setFormData] = useState({ name: "", teacher: "", time: "" });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const fetchGroup = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/groups/${id}`);
+        const data = await res.json();
+        setFormData({ name: data.name, teacher: data.professor_name, time: data.timing });
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchGroup();
+  }, [id]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "تم تحديث المجموعة",
-      description: "تم تحديث بيانات المجموعة بنجاح",
-    });
-    navigate(`/groups/${id}`);
+    try {
+      const res = await fetch(`http://localhost:5000/groups/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          professor_name: formData.teacher,
+          timing: formData.time,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      toast({ title: "تم تحديث المجموعة", description: "تم تعديل البيانات بنجاح" });
+      navigate(`/groups/${id}`);
+    } catch (err: any) {
+      toast({ title: "خطأ", description: err.message });
+    }
   };
 
   return (
@@ -73,9 +94,7 @@ const EditGroup = () => {
             </div>
 
             <div className="flex gap-4 pt-4">
-              <Button type="submit" className="flex-1">
-                حفظ التعديلات
-              </Button>
+              <Button type="submit" className="flex-1">حفظ التعديلات</Button>
               <Button
                 type="button"
                 variant="outline"
