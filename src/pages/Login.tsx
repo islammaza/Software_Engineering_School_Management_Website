@@ -1,34 +1,80 @@
 // src/pages/Login.tsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/lib/supabaseClient";
 
-// مكوّن الزخرفة الإسلامية الذهبية
 const IslamicOrnament = () => (
   <div className="w-full h-2 bg-gradient-to-r from-transparent via-primary to-transparent opacity-60 my-8" />
 );
 
 const Login = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Must match Signup hash
+  const hashPassword = async (password: string) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // تسجيل دخول وهمي - في التطبيق الحقيقي سيتم استدعاء الباك إند
-    navigate("/groups");
+    setIsLoading(true);
+
+    try {
+      console.log('Step 1: Hashing password...');
+      const hashedPassword = await hashPassword(formData.password);
+
+      console.log('Step 2: Checking credentials...');
+      
+      // Find school with matching email and password
+      const { data: schoolData, error: schoolError } = await supabase
+        .from('schools')
+        .select('*')
+        .eq('admin_email', formData.email)
+        .eq('password_hashed', hashedPassword)
+        .single();
+
+      console.log('Login result:', { schoolData, schoolError });
+
+      if (schoolError || !schoolData) {
+        alert("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+        setIsLoading(false);
+        return;
+      }
+
+      // Store session information locally (simple workaround)
+      localStorage.setItem('schoolId', schoolData.id);
+      localStorage.setItem('adminEmail', schoolData.admin_email);
+      localStorage.setItem('adminName', schoolData.admin_name);
+
+      alert(`مرحباً ${schoolData.admin_name}! 🌟`);
+      navigate("/groups");
+
+    } catch (error: any) {
+      console.error('❌ Login error:', error);
+      alert("حدث خطأ، يرجى المحاولة مرة أخرى");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/5 via-background to-background px-4 py-12">
       <div className="w-full max-w-md">
         
-        {/* الهيدر الإسلامي الجميل مع الحركة */}
         <div className="text-center mb-10">
           <div className="inline-block p-6 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 quran-glow animate-float mb-8 shadow-2xl">
             <BookOpen className="w-20 h-20 text-primary" strokeWidth={1.5} />
@@ -48,7 +94,6 @@ const Login = () => {
           </p>
         </div>
 
-        {/* بطاقة تسجيل الدخول الزجاجية */}
         <div className="glass-card p-8 rounded-2xl border border-primary/20 shadow-2xl backdrop-blur-md">
           <h2 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             مرحباً بك مرة أخرى
@@ -64,7 +109,9 @@ const Login = () => {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
+                disabled={isLoading}
                 className="text-right text-lg h-12 border-primary/30 focus:border-primary transition-all"
+                dir="ltr"
               />
             </div>
 
@@ -77,16 +124,25 @@ const Login = () => {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
-                className="text-right text-lg h- h-12 border-primary/30 focus:border-primary transition-all"
+                disabled={isLoading}
+                className="text-right text-lg h-12 border-primary/30 focus:border-primary transition-all"
               />
             </div>
 
             <Button
               type="submit"
               size="lg"
-              className="w-full text-xl py-7 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90% text-white font-bold shadow-xl hover:shadow-2xl transition-all duration-500"
+              disabled={isLoading}
+              className="w-full text-xl py-7 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold shadow-xl hover:shadow-2xl transition-all duration-500 disabled:opacity-50"
             >
-              تسجيل الدخول
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  جاري تسجيل الدخول...
+                </>
+              ) : (
+                "تسجيل الدخول"
+              )}
             </Button>
           </form>
 
@@ -100,7 +156,6 @@ const Login = () => {
           </div>
         </div>
 
-        {/* العودة للرئيسية */}
         <div className="mt-8 text-center">
           <Link
             to="/"
