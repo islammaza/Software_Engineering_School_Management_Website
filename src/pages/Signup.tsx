@@ -1,18 +1,19 @@
 // src/pages/Signup.tsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/lib/supabaseClient";
 
-// زخرفة إسلامية ذهبية
 const IslamicOrnament = () => (
   <div className="w-full h-2 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-60 my-10 max-w-2xl mx-auto" />
 );
 
 const Signup = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     schoolName: "",
@@ -23,17 +24,103 @@ const Signup = () => {
     confirmPassword: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [errors, setErrors] = useState({
+    passwordMismatch: false,
+    weakPassword: false,
+  });
+
+  const validateForm = () => {
+    const newErrors = {
+      passwordMismatch: formData.password !== formData.confirmPassword,
+      weakPassword: formData.password.length < 6,
+    };
+    
+    setErrors(newErrors);
+    return !newErrors.passwordMismatch && !newErrors.weakPassword;
+  };
+
+  // Simple hash function (for demo - use bcrypt in production!)
+  const hashPassword = async (password: string) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // تسجيل وهمي - في التطبيق الحقيقي سيتصل بالسيرفر
-    navigate("/groups");
+    
+    console.log('🚀 Form submitted!');
+    
+    if (!validateForm()) {
+      alert(errors.passwordMismatch 
+        ? "كلمتا المرور غير متطابقتين" 
+        : "كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      console.log('Step 1: Checking if email already exists...');
+      
+      // Check if email already exists
+      const { data: existingSchool } = await supabase
+        .from('schools')
+        .select('admin_email')
+        .eq('admin_email', formData.email)
+        .single();
+
+      if (existingSchool) {
+        alert("البريد الإلكتروني مستخدم بالفعل");
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('Step 2: Hashing password...');
+      const hashedPassword = await hashPassword(formData.password);
+      
+      console.log('Step 3: Creating school record...');
+
+      // Create school record with hashed password
+      const { data: schoolData, error: schoolError } = await supabase
+        .from('schools')
+        .insert([
+          {
+            name: formData.schoolName,
+            phone: formData.phone || null,
+            admin_name: formData.adminName,
+            admin_email: formData.email,
+            password_hashed: hashedPassword,
+          }
+        ])
+        .select()
+        .single();
+
+      console.log('School insert result:', { schoolData, schoolError });
+
+      if (schoolError) throw schoolError;
+
+      // Store session in localStorage (simple approach)
+      localStorage.setItem('schoolId', schoolData.id);
+      localStorage.setItem('adminEmail', schoolData.admin_email);
+      localStorage.setItem('adminName', schoolData.admin_name);
+
+      alert("✅ تم إنشاء الحساب بنجاح!");
+      navigate("/groups");
+
+    } catch (error: any) {
+      console.error('❌ Full error object:', error);
+      alert("❌ فشل إنشاء الحساب: " + (error.message || "حدث خطأ"));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/5 via-background to-background px-4 py-12">
       <div className="w-full max-w-2xl">
-
-        {/* الهيدر الإسلامي الفاخر */}
         <div className="text-center mb-12">
           <div className="inline-block p-8 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 quran-glow animate-float mb-8 shadow-2xl">
             <BookOpen className="w-24 h-24 text-primary" strokeWidth={1.5} />
@@ -46,12 +133,11 @@ const Signup = () => {
           <IslamicOrnament />
 
           <p className="text-2xl sm:text-3xl font-amiri italic text-gradient-durar leading-relaxed mb-4">
-            "خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ"
+            "خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ"
           </p>
           <p className="text-lg text-muted-foreground font-bold">(رواه البخاري)</p>
         </div>
 
-        {/* بطاقة التسجيل الزجاجية الفاخرة */}
         <div className="glass-card p-10 md:p-12 rounded-3xl border border-primary/20 shadow-2xl backdrop-blur-md">
           <h2 className="text-3xl sm:text-4xl font-black text-center mb-10 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             إنشاء حساب مدرسة جديد
@@ -67,6 +153,7 @@ const Signup = () => {
                   value={formData.schoolName}
                   onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })}
                   required
+                  disabled={isLoading}
                   className="text-right text-lg h-14 border-primary/30 focus:border-primary transition-all"
                 />
               </div>
@@ -79,6 +166,7 @@ const Signup = () => {
                   value={formData.adminName}
                   onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
                   required
+                  disabled={isLoading}
                   className="text-right text-lg h-14 border-primary/30 focus:border-primary transition-all"
                 />
               </div>
@@ -94,6 +182,7 @@ const Signup = () => {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
+                  disabled={isLoading}
                   className="text-right text-lg h-14 border-primary/30 focus:border-primary transition-all"
                   dir="ltr"
                 />
@@ -107,6 +196,7 @@ const Signup = () => {
                   placeholder="966xxxxxxxxx"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  disabled={isLoading}
                   className="text-right text-lg h-14 border-primary/30 focus:border-primary transition-all"
                   dir="ltr"
                 />
@@ -123,8 +213,14 @@ const Signup = () => {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required
-                  className="text-right text-lg h-14 border-primary/30 focus:border-primary transition-all"
+                  disabled={isLoading}
+                  className={`text-right text-lg h-14 border-primary/30 focus:border-primary transition-all ${
+                    errors.weakPassword ? 'border-red-500' : ''
+                  }`}
                 />
+                {errors.weakPassword && (
+                  <p className="text-red-500 text-sm text-right">كلمة المرور يجب أن تكون 6 أحرف على الأقل</p>
+                )}
               </div>
 
               <div className="space-y-3">
@@ -136,17 +232,31 @@ const Signup = () => {
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   required
-                  className="text-right text-lg h-14 border-primary/30 focus:border-primary transition-all"
+                  disabled={isLoading}
+                  className={`text-right text-lg h-14 border-primary/30 focus:border-primary transition-all ${
+                    errors.passwordMismatch ? 'border-red-500' : ''
+                  }`}
                 />
+                {errors.passwordMismatch && (
+                  <p className="text-red-500 text-sm text-right">كلمتا المرور غير متطابقتين</p>
+                )}
               </div>
             </div>
 
             <Button
               type="submit"
               size="lg"
-              className="w-full text-2xl py-8 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold shadow-2xl hover:shadow-[var(--gold)]/40 transition-all duration-500"
+              disabled={isLoading}
+              className="w-full text-2xl py-8 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold shadow-2xl hover:shadow-[var(--gold)]/40 transition-all duration-500 disabled:opacity-50"
             >
-              إنشاء الحساب
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                  جاري إنشاء الحساب...
+                </>
+              ) : (
+                "إنشاء الحساب"
+              )}
             </Button>
           </form>
 
@@ -160,7 +270,6 @@ const Signup = () => {
           </div>
         </div>
 
-        {/* العودة للرئيسية */}
         <div className="mt-12 text-center">
           <Link
             to="/"
