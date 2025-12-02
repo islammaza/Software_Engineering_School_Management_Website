@@ -248,4 +248,5 @@ export const checkPhoneDuplicate = async (
   } catch (error: any) {
     return { data: null, error: error.message };
   }
+  
 };

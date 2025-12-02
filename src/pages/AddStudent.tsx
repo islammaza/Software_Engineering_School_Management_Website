@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabaseClient";
+import { addStudent } from "@/lib/api/students"; // Import the API function
 
 const AddStudent = () => {
   const navigate = useNavigate();
@@ -155,47 +155,6 @@ const AddStudent = () => {
     return age;
   };
 
-  // Check for duplicate student - ALL FIELDS MUST MATCH
-  const checkForDuplicate = async (): Promise<string | null> => {
-    if (!groupId) return "معرف المجموعة غير موجود";
-    
-    const cleanPhone = formData.contact.replace(/\D/g, '');
-    const cleanName = formData.name.trim();
-    
-    // Check if student with EXACT SAME INFORMATION exists in the group
-    const { data: existingStudent, error } = await supabase
-      .from("students")
-      .select("id, full_name, contact_info, date_of_birth")
-      .eq("full_name", cleanName)
-      .eq("contact_info", cleanPhone)
-      .eq("date_of_birth", formData.birthdate)
-      .eq("group_id", Number(groupId))
-      .maybeSingle();
-
-    if (error) {
-      console.error("Error checking duplicate:", error);
-      return "خطأ في التحقق من البيانات المكررة";
-    }
-
-    if (existingStudent) {
-      // Format the date for display
-      const birthDate = new Date(existingStudent.date_of_birth);
-      const formattedDate = birthDate.toLocaleDateString('ar-SA', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-      
-      return `هذا الطالب مسجل بالفعل في المجموعة بنفس البيانات:
-      
-الاسم: ${existingStudent.full_name}
-الهاتف: ${existingStudent.contact_info}
-تاريخ الميلاد: ${formattedDate}`;
-    }
-    
-    return null;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -217,34 +176,16 @@ const AddStudent = () => {
       return;
     }
 
-    // Check for duplicates - ALL FIELDS
-    const duplicateError = await checkForDuplicate();
-    if (duplicateError) {
-      setErrors({ general: duplicateError });
-      toast({
-        title: "طالب موجود مسبقاً",
-        description: "تم العثور على طالب بنفس البيانات في المجموعة",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
-      const cleanPhone = formData.contact.replace(/\D/g, '');
-      const cleanName = formData.name.trim();
-      
-      // Insert student
-      const { data, error } = await supabase
-        .from("students")
-        .insert({
-          full_name: cleanName,
-          group_id: Number(groupId),
-          contact_info: cleanPhone,
-          date_of_birth: formData.birthdate,
-        })
-        .select();
+      // Use the addStudent API function (which includes duplicate check in the backend)
+      const { data, error } = await addStudent({
+        full_name: formData.name.trim(),
+        contact_info: formData.contact.replace(/\D/g, ''),
+        date_of_birth: formData.birthdate,
+        group_id: Number(groupId),
+      });
 
       if (error) {
         throw new Error(error.message);
@@ -252,7 +193,7 @@ const AddStudent = () => {
 
       toast({
         title: "تمت الإضافة بنجاح",
-        description: `تمت إضافة الطالب ${cleanName} بنجاح`,
+        description: `تمت إضافة الطالب ${formData.name.trim()} بنجاح`,
       });
 
       navigate(`/groups/${groupId}`);
@@ -396,7 +337,7 @@ const AddStudent = () => {
               <div className="text-sm text-muted-foreground space-y-1">
                 <p>رقم ولي الأمر (10 أرقام)</p>
                 <p className="text-xs">
-                  موبايل: 05, 06, 07 | أرضي: 01, 02, 03, 04, 08, 09
+                  
                 </p>
               </div>
             </div>
