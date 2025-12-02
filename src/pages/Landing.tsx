@@ -41,7 +41,7 @@ const Landing = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary via-[var(--gold)] via-60% to-primary bg-clip-text text-transparent mb-8 leading-tight"
+            className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary via-[var(--gold)] via-60% to-primary bg-clip-text text mb-8 leading-tight"
           >
             دار القرآن الكريم
           </motion.h1>
@@ -84,7 +84,7 @@ const Landing = () => {
           <motion.h2
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            className="text-4xl md:text-5xl font-bold text-center mb-20 bg-gradient-to-r from-primary to-[var(--gold)] bg-clip-text text-transparent"
+            className="text-4xl md:text-5xl font-bold text-center mb-20 bg-gradient-to-r from-primary to-[var(--gold)] bg-clip-text text"
           >
             بركة في كل خطوة مع دار القرآن
           </motion.h2>
