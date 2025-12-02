@@ -170,7 +170,7 @@ const Dashboard = () => {
           <div className="max-w-4xl mx-auto space-y-6">
             {needsAttention.map((s) => (
               <Card key={s.id} className="glass-card p-8 border-2 border-red-500/30 hover:border-red-500 transition-all">
-                <div Rheum className="flex items-center justify-between">
+                <div className="flex items-center justify-between">
                   <div className="text-right">
                     <h3 className="text-2xl sm:text-3xl font-black text-red-600">{s.name}</h3>
                   </div>
