@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabaseClient";
+import { getModulesByGroup, deleteModuleById } from "@/lib/api/modules";
+import { getStudentsByGroup, deleteStudentById } from "@/lib/api/students";
 
 const GroupDetails = () => {
   const { id } = useParams(); // group id
@@ -42,33 +44,41 @@ const GroupDetails = () => {
         .single();
 
       if (groupError) {
-        toast({ title: "خطأ", description: groupError.message, variant: "destructive" });
+        toast({
+          title: "خطأ",
+          description: groupError.message,
+          variant: "destructive",
+        });
         return;
       }
       setGroup(groupData);
 
       // Fetch students
-      const { data: studentsData, error: studentsError } = await supabase
-        .from("students")
-        .select("*")
-        .eq("group_id", Number(id));
+      const { data: studentsData, error: studentsError } =
+        await getStudentsByGroup(Number(id));
 
       if (studentsError) {
-        toast({ title: "خطأ", description: studentsError.message, variant: "destructive" });
+        toast({
+          title: "خطأ",
+          description: studentsError.message,
+          variant: "destructive",
+        });
       } else {
-        setStudents(studentsData);
+        setStudents(studentsData || []);
       }
 
       // Fetch modules
-      const { data: modulesData, error: modulesError } = await supabase
-        .from("modules")
-        .select("*")
-        .eq("group_id", Number(id));
+      const { data: modulesData, error: modulesError } =
+        await getModulesByGroup(Number(id));
 
       if (modulesError) {
-        toast({ title: "خطأ", description: modulesError.message, variant: "destructive" });
+        toast({
+          title: "خطأ",
+          description: modulesError.message,
+          variant: "destructive",
+        });
       } else {
-        setModules(modulesData);
+        setModules(modulesData || []);
       }
     };
 
@@ -79,19 +89,18 @@ const GroupDetails = () => {
   const handleDeleteStudent = async () => {
     if (!deleteStudentId) return;
 
-    const studentId = Number(deleteStudentId);
-
-    const { error } = await supabase
-      .from("students")
-      .delete()
-      .eq("id", studentId);
+    const { error } = await deleteStudentById(deleteStudentId);
 
     if (error) {
-      toast({ title: "خطأ", description: error.message, variant: "destructive" });
+      toast({
+        title: "خطأ",
+        description: error.message,
+        variant: "destructive",
+      });
       return;
     }
 
-    setStudents((prev) => prev.filter((s) => s.id !== studentId));
+    setStudents((prev) => prev.filter((s) => s.id !== deleteStudentId));
     toast({ title: "تم الحذف", description: "تم حذف الطالب بنجاح" });
     setDeleteStudentId(null);
   };
@@ -100,19 +109,18 @@ const GroupDetails = () => {
   const handleDeleteModule = async () => {
     if (!deleteModuleId) return;
 
-    const moduleId = Number(deleteModuleId);
-
-    const { error } = await supabase
-      .from("modules")
-      .delete()
-      .eq("id", moduleId);
+    const { error } = await deleteModuleById(deleteModuleId.toString());
 
     if (error) {
-      toast({ title: "خطأ", description: error.message, variant: "destructive" });
+      toast({
+        title: "خطأ",
+        description: error.message,
+        variant: "destructive",
+      });
       return;
     }
 
-    setModules((prev) => prev.filter((m) => m.id !== moduleId));
+    setModules((prev) => prev.filter((m) => m.id !== deleteModuleId));
     toast({ title: "تم الحذف", description: "تم حذف الوحدة بنجاح" });
     setDeleteModuleId(null);
   };
@@ -184,7 +192,9 @@ const GroupDetails = () => {
                 >
                   <div className="lg:grid lg:grid-cols-12 gap-4 items-center">
                     <div className="lg:col-span-5">
-                      <p className="text-xl font-bold text-right">{student.full_name}</p>
+                      <p className="text-xl font-bold text-right">
+                        {student.full_name}
+                      </p>
                     </div>
 
                     <div className="lg:col-span-3 text-center mt-4 lg:mt-0">
@@ -251,14 +261,22 @@ const GroupDetails = () => {
               >
                 <div className="flex items-center justify-between">
                   <div className="text-right">
-                    <h3 className="text-2xl font-black text-primary">{module.name}</h3>
-                    <p className="text-lg text-muted-foreground mt-2">{module.description}</p>
+                    <h3 className="text-2xl font-black text-primary">
+                      {module.name}
+                    </h3>
+                    <p className="text-lg text-muted-foreground mt-2">
+                      {module.description}
+                    </p>
                   </div>
                   <div className="flex gap-3">
                     <Button
                       size="icon"
                       variant="ghost"
                       className="hover:text-primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/groups/${id}/modules/${module.id}/edit`);
+                      }}
                     >
                       <Edit className="w-5 h-5" />
                     </Button>
@@ -346,7 +364,6 @@ const GroupDetails = () => {
       </div>
     </DashboardLayout>
   );
-  
 };
 
 export default GroupDetails;
