@@ -1,6 +1,6 @@
 import { getReportDataForPdf, refreshReportSummary } from "../api/student_report";
 
-// Simple filename sanitizer: replace spaces with underscores; keep Arabic letters
+// this is how to name the file : replace spaces with underscores; keep Arabic letters
 function buildFilename(studentName: string) {
   const safe = studentName.trim().replace(/\s+/g, "_");
   return `${safe}_تقرير.pdf`;
@@ -26,7 +26,7 @@ function rtl(text: string) {
     "(": "\uFD3E", // ornate left parenthesis for RTL
     ")": "\uFD3F", // ornate right parenthesis for RTL
   };
-  let normalized = text.replace(/[0-9]/g, (d) => westernToArabicDigits[d] || d)
+  const normalized = text.replace(/[0-9]/g, (d) => westernToArabicDigits[d] || d)
                        .replace(/[,:;?\-()]/g, (p) => punctMap[p] || p)
                        .replace(/\s+/g, (s) => s.replace(/ /g, "\u00A0")); // non-breaking space
   // Avoid double-wrapping
@@ -146,7 +146,9 @@ export async function exportStudentReportPdf(studentId: string) {
         };
         const cacheKey = map[filename];
         if (cacheKey) {
-          try { window.localStorage.setItem(cacheKey, base64); } catch (_) {}
+          try { window.localStorage.setItem(cacheKey, base64); } catch (e) {
+            console.warn('Failed to cache font:', e);
+          }
         }
       }
     };

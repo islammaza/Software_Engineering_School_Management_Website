@@ -4,6 +4,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Users, Clock, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getGroupsBySchool, Group } from "@/lib/api/groups";
+import { requireAuth } from "@/lib/auth";
 
 const Groups = () => {
   const navigate = useNavigate();
@@ -15,8 +16,8 @@ const Groups = () => {
     async function loadGroups() {
       setLoading(true);
 
-      //after signin completed
-      const schoolId = "1"; // make it string to match backend type
+      const schoolId = requireAuth(navigate);
+      if (!schoolId) return;
 
       try {
         const data = await getGroupsBySchool(schoolId);
@@ -29,7 +30,7 @@ const Groups = () => {
     }
 
     loadGroups();
-  }, []);
+  }, [navigate]);
 
   return (
     <DashboardLayout>
@@ -57,7 +58,27 @@ const Groups = () => {
 
         {loading && <p className="text-center text-xl">يتم تحميل البيانات...</p>}
 
-        {!loading && (
+        {!loading && groups.length === 0 && (
+          <div className="text-center py-16 md:py-24">
+            <Users className="w-20 h-20 md:w-32 md:h-32 mx-auto mb-6 text-muted-foreground opacity-50" />
+            <h2 className="text-2xl md:text-4xl font-bold mb-4 text-muted-foreground">
+              لا توجد مجموعات حتى الآن
+            </h2>
+            <p className="text-base md:text-xl text-muted-foreground mb-8">
+              ابدأ بإضافة مجموعة جديدة لتحفيظ القرآن الكريم
+            </p>
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-primary to-[var(--gold)] text-white text-sm md:text-xl px-6 md:px-10 py-4 md:py-7 shadow-xl"
+              onClick={() => navigate("/groups/add")}
+            >
+              <Plus className="w-5 h-5 md:w-6 md:h-6 ml-2 md:ml-3" />
+              إضافة أول مجموعة
+            </Button>
+          </div>
+        )}
+
+        {!loading && groups.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-10">
             {groups.map((group) => (
               <div

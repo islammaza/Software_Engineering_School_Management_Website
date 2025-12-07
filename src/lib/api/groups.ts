@@ -72,3 +72,68 @@ export async function getGroupsBySchool(school_id: string) {
   if (error) throw error;
   return data;
 }
+
+// -------------------------
+// GET GROUP BY ID
+// -------------------------
+export async function getGroupById(groupId: string) {
+  const { data, error } = await supabase
+    .from('groups')
+    .select('*')
+    .eq('id', groupId)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+// -------------------------
+// UPDATE GROUP
+// -------------------------
+export async function updateGroup(groupId: string, updates: Partial<Group>) {
+  const { data, error } = await supabase
+    .from('groups')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', groupId)
+    .select();
+  if (error) throw error;
+  return data;
+}
+
+// -------------------------
+// DELETE GROUP
+// -------------------------
+export async function deleteGroup(groupId: string) {
+  // First, delete all students in the group
+  const { error: studentsError } = await supabase
+    .from('students')
+    .delete()
+    .eq('group_id', groupId);
+  
+  if (studentsError) {
+    console.warn('Error deleting students:', studentsError);
+    // Continue even if no students exist
+  }
+
+  // Delete all modules in the group
+  const { error: modulesError } = await supabase
+    .from('modules')
+    .delete()
+    .eq('group_id', groupId);
+  
+  if (modulesError) {
+    console.warn('Error deleting modules:', modulesError);
+    // Continue even if no modules exist
+  }
+
+  // Finally, delete the group itself
+  const { error } = await supabase
+    .from('groups')
+    .delete()
+    .eq('id', groupId);
+    
+  if (error) throw error;
+  return true;
+}

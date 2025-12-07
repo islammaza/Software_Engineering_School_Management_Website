@@ -40,7 +40,6 @@ const StudentDetails = () => {
   const [modules, setModules] = useState<ModuleView[]>([]);
   const [reportId, setReportId] = useState<string | null>(null);
 
-  // ملاحظة الأستاذ العامة – قابلة للتعديل
   const [generalRemark, setGeneralRemark] = useState<string>("");
   const [editingGeneral, setEditingGeneral] = useState(false);
   const [tempGeneralRemark, setTempGeneralRemark] = useState(generalRemark);

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabaseClient";
+import { getGroupById, updateGroup, deleteGroup } from "@/lib/api/groups";
 
 interface GroupForm {
   name: string;
@@ -27,68 +27,79 @@ const EditGroup = () => {
   const [loading, setLoading] = useState(true);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  
   useEffect(() => {
     if (!id) return;
 
     async function loadGroup() {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("groups")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      if (error) {
-        console.error("Failed to fetch group:", error.message);
-        toast({ title: "خطأ", description: "فشل في جلب بيانات المجموعة" });
-      } else if (data) {
+      try {
+        const data = await getGroupById(id);
         setFormData({
           name: data.name,
           teacher_name: data.teacher_name,
           timing: data.timing,
         });
+      } catch (error) {
+        console.error("Failed to fetch group:", error);
+        toast({ 
+          title: "خطأ", 
+          description: "فشل في جلب بيانات المجموعة",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
     loadGroup();
-  }, [id]);
+  }, [id, toast]);
 
   // Update group
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
 
-    const { error } = await supabase
-      .from("groups")
-      .update({
+    try {
+      await updateGroup(id, {
         name: formData.name,
         teacher_name: formData.teacher_name,
         timing: formData.timing,
-        updated_at: new Date(),
-      })
-      .eq("id", id);
-
-    if (error) {
-      console.error("Failed to update group:", error.message);
-      toast({ title: "خطأ", description: "فشل في تحديث بيانات المجموعة" });
-    } else {
-      toast({ title: "تم تحديث المجموعة", description: "تم تحديث بيانات المجموعة بنجاح" });
+      });
+      toast({ 
+        title: "تم التحديث", 
+        description: "تم تحديث بيانات المجموعة بنجاح" 
+      });
       navigate(`/groups/${id}`);
+    } catch (error) {
+      console.error("Failed to update group:", error);
+      toast({ 
+        title: "خطأ", 
+        description: "فشل في تحديث بيانات المجموعة",
+        variant: "destructive"
+      });
     }
   };
 
   // Delete group
   const handleDeleteGroup = async () => {
     if (!id) return;
-    const { error } = await supabase.from("groups").delete().eq("id", id);
-    if (error) {
-      console.error("Failed to delete group:", error.message);
-      toast({ title: "خطأ", description: "فشل في حذف المجموعة" });
-    } else {
-      toast({ title: "تم الحذف", description: "تم حذف المجموعة بنجاح" });
+    try {
+      await deleteGroup(id);
+      setDeleteOpen(false);
+      toast({ 
+        title: "تم الحذف", 
+        description: "تم حذف المجموعة بنجاح" 
+      });
       navigate("/groups");
+    } catch (error: any) {
+      console.error("Failed to delete group:", error);
+      const errorMessage = error?.message || "فشل في حذف المجموعة";
+      setDeleteOpen(false);
+      toast({ 
+        title: "خطأ", 
+        description: errorMessage,
+        variant: "destructive"
+      });
     }
   };
 

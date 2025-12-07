@@ -6,13 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import * as GroupsAPI from "@/lib/api/groups";
+import { requireAuth } from "@/lib/auth";
 
 const AddGroup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // need to be replaced with actual school ID from context or auth
-  const SCHOOL_ID = "1";
 
   const [formData, setFormData] = useState<{
     name: string;
@@ -27,12 +25,15 @@ const AddGroup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const schoolId = requireAuth(navigate);
+    if (!schoolId) return;
+
     try {
       await GroupsAPI.addGroup({
         name: formData.name,
         teacher_name: formData.teacher_name,
         timing: formData.timing,
-        school_id: SCHOOL_ID, // REQUIRED
+        school_id: schoolId,
       });
 
       toast({
