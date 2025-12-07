@@ -1,6 +1,6 @@
 import { getReportDataForPdf, refreshReportSummary } from "../api/student_report";
 
-// Simple filename sanitizer: replace spaces with underscores; keep Arabic letters
+// this is how to name the file : replace spaces with underscores; keep Arabic letters
 function buildFilename(studentName: string) {
   const safe = studentName.trim().replace(/\s+/g, "_");
   return `${safe}_تقرير.pdf`;
