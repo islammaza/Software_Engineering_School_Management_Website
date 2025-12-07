@@ -18,7 +18,6 @@ import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import ModuleDetails from "./pages/ModuleDetails";
 
-
 import ModuleForm from "./pages/ModuleForm";
 
 const queryClient = new QueryClient();
@@ -37,13 +36,29 @@ const App = () => (
           <Route path="/groups/add" element={<AddGroup />} />
           <Route path="/groups/:id" element={<GroupDetails />} />
           <Route path="/groups/:id/edit" element={<EditGroup />} />
-          <Route path="/groups/:groupId/students/add" element={<AddStudent />} />
-          <Route path="/groups/:groupId/students/:studentId" element={<StudentDetails />} />
-          <Route path="/groups/:groupId/students/:studentId/edit" element={<EditStudent />} />
-          <Route path="/groups/:id/modules/:moduleId" element={<ModuleDetails />} />
+          <Route
+            path="/groups/:groupId/students/add"
+            element={<AddStudent />}
+          />
+          <Route
+            path="/groups/:groupId/students/:studentId"
+            element={<StudentDetails />}
+          />
+          <Route
+            path="/groups/:groupId/students/:studentId/edit"
+            element={<EditStudent />}
+          />
+          <Route path="/groups/:id/modules/add" element={<ModuleForm />} />
+          <Route
+            path="/groups/:id/modules/:moduleId/edit"
+            element={<ModuleForm />}
+          />
+          <Route
+            path="/groups/:id/modules/:moduleId"
+            element={<ModuleDetails />}
+          />
           <Route path="/settings" element={<Settings />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/groups/:id/modules/add" element={<ModuleForm />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
