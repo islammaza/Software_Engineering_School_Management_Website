@@ -322,11 +322,11 @@ const Dashboard = () => {
                                 parseFloat(e.target.value) || 0,
                             })
                           }
-                          className="text-6xl font-black text-center mb-2"
+                          className="text-[clamp(1.7rem,4.2vw,2.6rem)] sm:text-[clamp(2rem,3.8vw,3rem)] md:text-[clamp(2.3rem,3.4vw,3.3rem)] font-black text-center mb-2 w-full max-w-[7rem] mx-auto"
                         />
                       ) : (
                         <div className="mb-4">
-                          <p className="text-7xl font-black text-foreground leading-none">
+                          <p className="text-[clamp(1.8rem,5vw,3rem)] sm:text-[clamp(2.2rem,4.6vw,3.5rem)] md:text-[clamp(2.5rem,4.2vw,3.9rem)] lg:text-[clamp(2.9rem,3.8vw,4.3rem)] font-black text-foreground leading-tight break-words max-w-full text-center mx-auto">
                             {stat.value}
                           </p>
                           {stat.unit && (
