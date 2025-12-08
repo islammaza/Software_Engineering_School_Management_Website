@@ -57,6 +57,10 @@ const Dashboard = () => {
   const [topModules, setTopModules] = useState<any[]>([]);
   const [bottomModules, setBottomModules] = useState<any[]>([]);
   const [gradeDistribution, setGradeDistribution] = useState<any[]>([]);
+  const [groupGradeDistributions, setGroupGradeDistributions] = useState<any[]>(
+    []
+  );
+  const [showGroupDistributions, setShowGroupDistributions] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const today = new Date().toLocaleDateString("ar-EG", {
@@ -174,6 +178,10 @@ const Dashboard = () => {
 
       if (data?.gradeDistribution) {
         setGradeDistribution(data.gradeDistribution);
+      }
+
+      if (data?.groupGradeDistributions) {
+        setGroupGradeDistributions(data.groupGradeDistributions);
       }
 
       setLoading(false);
@@ -600,6 +608,94 @@ const Dashboard = () => {
               </p>
             )}
           </Card>
+        </div>
+
+        {/* توزيع الدرجات لكل مجموعة */}
+        <div className="max-w-6xl mx-auto space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-2xl sm:text-3xl font-black text-gradient-durar">
+              توزيع الدرجات لكل مجموعة
+            </h3>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowGroupDistributions((v) => !v)}
+            >
+              {showGroupDistributions ? "إخفاء" : "عرض"}
+            </Button>
+          </div>
+
+          {showGroupDistributions && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {loading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <Card
+                    key={i}
+                    className="glass-card p-4 border border-primary/10"
+                  >
+                    <Skeleton className="h-6 w-40 mb-4" />
+                    <Skeleton className="h-48 w-full" />
+                  </Card>
+                ))
+              ) : groupGradeDistributions &&
+                groupGradeDistributions.length > 0 ? (
+                groupGradeDistributions.map((g: any) => (
+                  <Card
+                    key={g.group_id}
+                    className="glass-card p-4 border border-primary/10"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-xl font-bold text-foreground">
+                        {g.group_name}
+                      </h4>
+                    </div>
+                    <ChartContainer
+                      className="w-full"
+                      config={{
+                        count: {
+                          label: "عدد الطلاب",
+                          color: "hsl(var(--primary))",
+                        },
+                      }}
+                    >
+                      <BarChart data={g.bins} barSize={32}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis
+                          dataKey="label"
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          allowDecimals={false}
+                        />
+                        <ChartTooltip
+                          content={<ChartTooltipContent labelKey="label" />}
+                        />
+                        <Bar
+                          dataKey="count"
+                          fill="var(--color-count)"
+                          radius={[8, 8, 0, 0]}
+                        >
+                          <LabelList
+                            dataKey="percentage"
+                            position="top"
+                            formatter={(value: any) => `${value}%`}
+                            className="fill-foreground text-xs"
+                          />
+                        </Bar>
+                      </BarChart>
+                    </ChartContainer>
+                  </Card>
+                ))
+              ) : (
+                <Card className="glass-card p-4 text-center text-muted-foreground">
+                  لا توجد بيانات توزيع درجات للمجموعات
+                </Card>
+              )}
+            </div>
+          )}
         </div>
 
         {/* أبطال الحفظ */}
