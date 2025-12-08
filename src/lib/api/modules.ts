@@ -184,12 +184,28 @@ export async function updateModule(
 // Delete module by id
 
 export async function deleteModuleById(moduleId: string) {
-  const { data, error } = await supabase
-    .from("modules")
-    .delete()
-    .eq("id", moduleId)
-    .select();
-  return { data, error };
+  try {
+    // First, delete all assessments associated with this module
+    const { error: assessmentError } = await supabase
+      .from("assessments")
+      .delete()
+      .eq("module_id", moduleId);
+
+    if (assessmentError) {
+      return { data: null, error: assessmentError };
+    }
+
+    // Then delete the module itself
+    const { data, error } = await supabase
+      .from("modules")
+      .delete()
+      .eq("id", moduleId)
+      .select();
+
+    return { data, error };
+  } catch (error: any) {
+    return { data: null, error: error.message || "حدث خطأ أثناء حذف الوحدة" };
+  }
 }
 
 //Get module with all student assessments
