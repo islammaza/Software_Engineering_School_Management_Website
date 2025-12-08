@@ -220,6 +220,24 @@
     transform: scale(1.05);
   }
 
+  /* Dashboard-wide scale down */
+  .dashboard-scale {
+    transform: scale(0.9);
+    transform-origin: top center;
+  }
+
+  @media (max-width: 1024px) {
+    .dashboard-scale {
+      transform: scale(0.95);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .dashboard-scale {
+      transform: scale(0.98);
+    }
+  }
+
   /* ====================== Responsive Utilities ====================== */
   /* Mobile-first responsive text sizes */
   @media (max-width: 640px) {
