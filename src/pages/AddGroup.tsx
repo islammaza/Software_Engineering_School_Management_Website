@@ -5,23 +5,50 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import * as GroupsAPI from "@/lib/api/groups";
+import { requireAuth } from "@/lib/auth";
 
 const AddGroup = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
+
+  const [formData, setFormData] = useState<{
+    name: string;
+    teacher_name: string;
+    timing: string;
+  }>({
     name: "",
-    teacher: "",
-    time: "",
+    teacher_name: "",
+    timing: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "تم إضافة المجموعة",
-      description: "تمت إضافة المجموعة بنجاح",
-    });
-    navigate("/groups");
+
+    const schoolId = requireAuth(navigate);
+    if (!schoolId) return;
+
+    try {
+      await GroupsAPI.addGroup({
+        name: formData.name,
+        teacher_name: formData.teacher_name,
+        timing: formData.timing,
+        school_id: schoolId,
+      });
+
+      toast({
+        title: "تم إضافة المجموعة",
+        description: "تمت إضافة المجموعة بنجاح",
+      });
+
+      navigate("/groups");
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء الإضافة",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -40,34 +67,43 @@ const AddGroup = () => {
           <h1 className="text-3xl font-bold mb-6">إضافة مجموعة جديدة</h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Group Name */}
             <div className="space-y-2">
               <Label htmlFor="name">اسم المجموعة</Label>
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 placeholder="مثال: مجموعة الفرقان"
                 required
               />
             </div>
 
+            {/* Teacher Name */}
             <div className="space-y-2">
-              <Label htmlFor="teacher">اسم المعلم</Label>
+              <Label htmlFor="teacher_name">اسم المعلم</Label>
               <Input
-                id="teacher"
-                value={formData.teacher}
-                onChange={(e) => setFormData({ ...formData, teacher: e.target.value })}
+                id="teacher_name"
+                value={formData.teacher_name}
+                onChange={(e) =>
+                  setFormData({ ...formData, teacher_name: e.target.value })
+                }
                 placeholder="مثال: أحمد محمود"
                 required
               />
             </div>
 
+            {/* Timing */}
             <div className="space-y-2">
-              <Label htmlFor="time">وقت الحلقة</Label>
+              <Label htmlFor="timing">وقت الحلقة</Label>
               <Input
-                id="time"
-                value={formData.time}
-                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                id="timing"
+                value={formData.timing}
+                onChange={(e) =>
+                  setFormData({ ...formData, timing: e.target.value })
+                }
                 placeholder="مثال: السبت - الخميس"
                 required
               />
@@ -77,6 +113,7 @@ const AddGroup = () => {
               <Button type="submit" className="flex-1">
                 حفظ
               </Button>
+
               <Button
                 type="button"
                 variant="outline"

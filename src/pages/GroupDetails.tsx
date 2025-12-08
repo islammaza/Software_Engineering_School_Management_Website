@@ -1,4 +1,5 @@
 // src/pages/GroupDetails.tsx
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Plus, Edit, Trash2, ArrowLeft, FileText } from "lucide-react";
@@ -14,55 +15,139 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { getGroupById, deleteGroup } from "@/lib/api/groups";
+import { getModulesByGroup, deleteModuleById } from "@/lib/api/modules";
+import { getStudentsByGroup, deleteStudentById } from "@/lib/api/students";
 
 const GroupDetails = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // group id
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const group = { id, name: "مجموعة الفرقان", teacher: "أحمد محمود" };
-
-  const [students, setStudents] = useState([
-    { id: 1, name: "عبد الرحمن بن صالح" },
-    { id: 2, name: "فاطمة الزهراء" },
-    { id: 3, name: "يوسف بن علي" },
-    { id: 4, name: "خديجة بنت محمد" },
-    { id: 5, name: "عمر بن الخطاب" },
-  ]);
-
-  const [modules, setModules] = useState([
-    { id: 1, title: "سورة البقرة", description: "حفظ من الآية 1 إلى 141" },
-    { id: 2, title: "التجويد", description: "أحكام النون والميم والمدود" },
-    { id: 3, title: "مراجعة الجزء 30", description: "مراجعة كاملة مع التجويد" },
-    { id: 4, title: "آداب طالب العلم", description: "دروس تربوية أسبوعية" },
-  ]);
-
-  // حالة نافذة التأكيد
+  const [students, setStudents] = useState<any[]>([]);
+  const [modules, setModules] = useState<any[]>([]);
+  const [group, setGroup] = useState<any>({ name: "", teacher_name: "" });
   const [deleteStudentId, setDeleteStudentId] = useState<number | null>(null);
   const [deleteModuleId, setDeleteModuleId] = useState<number | null>(null);
+  const [deleteGroupOpen, setDeleteGroupOpen] = useState(false);
 
-  const handleDeleteStudent = () => {
-    if (deleteStudentId !== null) {
-      setStudents(students.filter((s) => s.id !== deleteStudentId));
-      toast({ title: "تم الحذف", description: "تم حذف الطالب بنجاح" });
-      setDeleteStudentId(null);
+  // Fetch group, students, modules on mount
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchGroupDetails = async () => {
+      try {
+        // Fetch group info
+        const groupData = await getGroupById(id);
+        setGroup(groupData);
+
+        // Fetch students
+        const { data: studentsData, error: studentsError } =
+          await getStudentsByGroup(Number(id));
+
+        if (studentsError) {
+          toast({
+            title: "خطأ",
+            description: studentsError.message,
+            variant: "destructive",
+          });
+        } else {
+          setStudents(studentsData || []);
+        }
+
+        // Fetch modules
+        const { data: modulesData, error: modulesError } =
+          await getModulesByGroup(Number(id));
+
+        if (modulesError) {
+          toast({
+            title: "خطأ",
+            description: modulesError.message,
+            variant: "destructive",
+          });
+        } else {
+          setModules(modulesData || []);
+        }
+      } catch (error) {
+        toast({
+          title: "خطأ",
+          description: "فشل في جلب بيانات المجموعة",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchGroupDetails();
+  }, [id, toast]);
+
+  // Delete student
+  const handleDeleteStudent = async () => {
+    if (!deleteStudentId) return;
+
+    const { error } = await deleteStudentById(deleteStudentId);
+
+    if (error) {
+      toast({
+        title: "خطأ",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
     }
+
+    setStudents((prev) => prev.filter((s) => s.id !== deleteStudentId));
+    toast({ title: "تم الحذف", description: "تم حذف الطالب بنجاح" });
+    setDeleteStudentId(null);
   };
 
-  const handleDeleteModule = () => {
-    if (deleteModuleId !== null) {
-      setModules(modules.filter((m) => m.id !== deleteModuleId));
-      toast({ title: "تم الحذف", description: "تم حذف الوحدة بنجاح" });
-      setDeleteModuleId(null);
+  // Delete module
+  const handleDeleteModule = async () => {
+    if (!deleteModuleId) return;
+
+    const { error } = await deleteModuleById(deleteModuleId.toString());
+
+    if (error) {
+      toast({
+        title: "خطأ",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setModules((prev) => prev.filter((m) => m.id !== deleteModuleId));
+    toast({ title: "تم الحذف", description: "تم حذف الوحدة بنجاح" });
+    setDeleteModuleId(null);
+  };
+
+
+  const handleDeleteGroup = async () => {
+    if (!id) return;
+    try {
+      await deleteGroup(id);
+      setDeleteGroupOpen(false);
+      toast({ 
+        title: "تم الحذف", 
+        description: "تم حذف المجموعة بنجاح" 
+      });
+      navigate("/groups");
+    } catch (error: any) {
+      console.error("Failed to delete group:", error);
+      const errorMessage = error?.message || "فشل في حذف المجموعة";
+      setDeleteGroupOpen(false);
+      toast({
+        title: "خطأ",
+        description: errorMessage,
+        variant: "destructive",
+      });
     }
   };
 
   return (
     <DashboardLayout>
       <div className="space-y-12 py-12 px-4 sm:px-6 lg:px-8">
-        {/* زر الرجوع */}
+        {/* Back button */}
         <div className="max-w-7xl mx-auto">
           <Button
             onClick={() => navigate("/groups")}
@@ -75,18 +160,18 @@ const GroupDetails = () => {
           </Button>
         </div>
 
-        {/* عنوان المجموعة */}
+        {/* Group title */}
         <div className="text-center">
           <h1 className="text-5xl sm:text-6xl font-black text-gradient-durar mb-4">
             {group.name}
           </h1>
           <p className="text-2xl sm:text-3xl text-[var(--gold)] font-bold">
-            المعلم: {group.teacher}
+            المعلم: {group.teacher_name}
           </p>
           <div className="w-full h-3 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-80 my-12" />
         </div>
 
-        {/* أزرار الإجراءات */}
+        {/* Actions */}
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <Button
             size="lg"
@@ -104,9 +189,17 @@ const GroupDetails = () => {
             <Edit className="w-5 h-5 ml-2" />
             تعديل المجموعة
           </Button>
+          <Button
+            size="lg"
+            variant="destructive"
+            onClick={() => setDeleteGroupOpen(true)}
+          >
+            <Trash2 className="w-5 h-5 ml-2" />
+            حذف المجموعة
+          </Button>
         </div>
 
-        {/* قائمة الطلاب */}
+        {/* Students list */}
         <div>
           <h2 className="text-4xl font-black text-center mb-8 text-gradient-durar">
             الطلاب
@@ -127,7 +220,7 @@ const GroupDetails = () => {
                   <div className="lg:grid lg:grid-cols-12 gap-4 items-center">
                     <div className="lg:col-span-5">
                       <p className="text-xl font-bold text-right">
-                        {student.name}
+                        {student.full_name}
                       </p>
                     </div>
 
@@ -171,7 +264,7 @@ const GroupDetails = () => {
           </div>
         </div>
 
-        {/* قائمة الوحدات */}
+        {/* Modules list */}
         <div>
           <div className="flex items-center justify-between mb-8 max-w-4xl mx-auto">
             <h2 className="text-4xl font-black text-gradient-durar">
@@ -196,7 +289,7 @@ const GroupDetails = () => {
                 <div className="flex items-center justify-between">
                   <div className="text-right">
                     <h3 className="text-2xl font-black text-primary">
-                      {module.title}
+                      {module.name}
                     </h3>
                     <p className="text-lg text-muted-foreground mt-2">
                       {module.description}
@@ -207,6 +300,10 @@ const GroupDetails = () => {
                       size="icon"
                       variant="ghost"
                       className="hover:text-primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/groups/${id}/modules/${module.id}/edit`);
+                      }}
                     >
                       <Edit className="w-5 h-5" />
                     </Button>
@@ -215,7 +312,7 @@ const GroupDetails = () => {
                       variant="ghost"
                       className="hover:text-destructive"
                       onClick={(e) => {
-                        e.stopPropagation(); // منع الانتقال لصفحة الوحدة
+                        e.stopPropagation(); // prevent navigating
                         setDeleteModuleId(module.id);
                       }}
                     >
@@ -228,7 +325,7 @@ const GroupDetails = () => {
           </div>
         </div>
 
-        {/* نافذة تأكيد حذف الطالب – نص أسود واضح + زر أحمر قوي */}
+        {/* Delete student dialog */}
         <AlertDialog
           open={deleteStudentId !== null}
           onOpenChange={() => setDeleteStudentId(null)}
@@ -260,7 +357,7 @@ const GroupDetails = () => {
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* نافذة تأكيد حذف الوحدة – نفس الستايل */}
+        {/* Delete module dialog */}
         <AlertDialog
           open={deleteModuleId !== null}
           onOpenChange={() => setDeleteModuleId(null)}
@@ -291,14 +388,38 @@ const GroupDetails = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-        {/* آية */}
-        <div className="text-center py-20">
-          <div className="w-full h-3 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-80 my-12 max-w-4xl mx-auto" />
-          <p className="text-5xl font-amiri italic text-gradient-durar leading-relaxed max-w-5xl mx-auto">
-            "وَذَكِّرْ فَإِنَّ الذِّكْرَىٰ تَنفَعُ الْمُؤْمِنِينَ"
-          </p>
-          <p className="text-2xl text-muted-foreground mt-8">سورة الذاريات</p>
-        </div>
+
+        {/* Delete group dialog */}
+        <AlertDialog
+          open={deleteGroupOpen}
+          onOpenChange={setDeleteGroupOpen}
+        >
+          <AlertDialogContent className="bg-white border-2 border-destructive/50 rounded-2xl shadow-2xl max-w-md mx-auto">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-2xl font-black text-black text-right">
+                هل أنت متأكد من حذف هذه المجموعة؟
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-lg text-gray-800 text-right leading-relaxed">
+                هذا الإجراء{" "}
+                <span className="font-bold text-destructive">
+                  لا يمكن التراجع عنه
+                </span>
+                . سيتم حذف المجموعة نهائيًا مع جميع الطلاب والوحدات المرتبطة بها.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="flex gap-4 justify-end mt-6">
+              <AlertDialogCancel className="text-lg px-10 py-6 border-2 border-gray-400 hover:bg-gray-100 font-bold">
+                إلغاء
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteGroup}
+                className="bg-red-600 hover:bg-red-700 text-white text-lg font-bold px-12 py-6 shadow-xl"
+              >
+                نعم، احذف المجموعة
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </DashboardLayout>
   );

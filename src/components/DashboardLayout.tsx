@@ -1,18 +1,18 @@
 // src/components/DashboardLayout.tsx
 import { ReactNode } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   BookOpen, 
   LayoutDashboard, 
   Users, 
-  FileCheck2, 
   Settings, 
   LogOut,
   Menu,
   X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getAdminName, logout } from "@/lib/auth";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -22,8 +22,17 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [adminName, setAdminName] = useState<string>("");
 
-  const handleLogout = () => navigate("/");
+  useEffect(() => {
+    const name = getAdminName();
+    setAdminName(name || "");
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const navItems = [
     { icon: LayoutDashboard, label: "لوحة التحكم", path: "/dashboard" },
@@ -35,8 +44,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-[hsl(var(--durar-cream))]">
-      {/* Header */}
-      <header className="bg-white border-b border-border sticky top-0 z-40 shadow-lg">
+      {/* Header - Fixed at top */}
+      <header className="bg-white border-b border-border fixed top-0 left-0 right-0 z-50 shadow-lg">
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo + Name */}
@@ -46,7 +55,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-xl md:text-2xl font-black text-gradient-durar">دار القرآن</h1>
-                <p className="text-xs md:text-sm text-muted-foreground font-bold">نظام إدارة حلقات التحفيظ</p>
+                <p className="text-xs md:text-sm text-muted-foreground font-bold">
+                  {adminName ? `مرحباً ${adminName}` : "نظام إدارة حلقات التحفيظ"}
+                </p>
               </div>
             </div>
 
@@ -76,10 +87,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         </div>
       </header>
 
-      <div className="flex relative">
-        {/* Sidebar - Desktop */}
-        <aside className="hidden md:block w-64 lg:w-80 bg-white border-l border-border min-h-screen p-6 lg:p-8 shadow-2xl">
-          <nav className="space-y-4">
+      {/* Add padding-top to account for fixed header */}
+      <div className="pt-16 md:pt-20">
+        {/* Sidebar - Desktop (Fixed position) */}
+        <aside className="hidden md:block md:w-64 lg:w-80 bg-white border-l border-border shadow-2xl fixed top-16 md:top-20 right-0 bottom-0 overflow-y-auto z-40">
+          <nav className="p-6 lg:p-8 space-y-4">
             {navItems.map((item) => (
               <Link
                 key={item.path}
@@ -87,22 +99,22 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 className={`sidebar-nav-link text-base lg:text-lg ${isActive(item.path) ? "active" : ""}`}
               >
                 <item.icon className="w-5 h-5 lg:w-6 lg:h-6" />
-                <span className="hidden lg:inline">{item.label}</span>
+                <span>{item.label}</span>
               </Link>
             ))}
           </nav>
         </aside>
 
-        {/* Sidebar - Mobile */}
+        {/* Sidebar - Mobile (Overlay) */}
         {sidebarOpen && (
           <>
             {/* Backdrop */}
             <div
-              className="fixed inset-0 bg-black/50 z-20 md:hidden"
+              className="fixed inset-0 bg-black/50 z-40 md:hidden"
               onClick={() => setSidebarOpen(false)}
             />
             {/* Mobile Sidebar */}
-            <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-white border-l border-border p-6 shadow-2xl z-30 md:hidden overflow-y-auto">
+            <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-white border-l border-border p-6 shadow-2xl z-50 md:hidden overflow-y-auto">
               <nav className="space-y-4">
                 {navItems.map((item) => (
                   <Link
@@ -120,8 +132,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </>
         )}
 
-        {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 lg:p-10 lg:p-16 w-full">
+        {/* Main Content - Scrollable with margin to account for fixed sidebar */}
+        <main className="md:mr-64 lg:mr-80 p-4 md:p-6 lg:p-10 min-h-screen">
           {children}
         </main>
       </div>
