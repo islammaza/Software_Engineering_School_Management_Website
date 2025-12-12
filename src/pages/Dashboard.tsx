@@ -285,7 +285,7 @@ const Dashboard = () => {
                       color: "text-primary",
                     },
                     {
-                      label: "المجموعات",
+                      label: "مجموعات",
                       value: stats.activeGroups,
                       icon: BookOpen,
                       color: "text-[var(--gold)]",
@@ -322,21 +322,21 @@ const Dashboard = () => {
                                 parseFloat(e.target.value) || 0,
                             })
                           }
-                          className="text-[clamp(1.7rem,4.2vw,2.6rem)] sm:text-[clamp(2rem,3.8vw,3rem)] md:text-[clamp(2.3rem,3.4vw,3.3rem)] font-black text-center mb-2 w-full max-w-[7rem] mx-auto"
+                          className="text-[clamp(1.25rem,3.2vw,2.0rem)] sm:text-[clamp(1.45rem,2.9vw,2.25rem)] md:text-[clamp(1.6rem,2.6vw,2.45rem)] font-black text-center mb-2 w-full max-w-[6rem] mx-auto"
                         />
                       ) : (
                         <div className="mb-4">
-                          <p className="text-[clamp(1.8rem,5vw,3rem)] sm:text-[clamp(2.2rem,4.6vw,3.5rem)] md:text-[clamp(2.5rem,4.2vw,3.9rem)] lg:text-[clamp(2.9rem,3.8vw,4.3rem)] font-black text-foreground leading-tight break-words max-w-full text-center mx-auto">
+                          <p className="text-[clamp(1.35rem,4.0vw,2.2rem)] sm:text-[clamp(1.55rem,3.6vw,2.55rem)] md:text-[clamp(1.75rem,3.2vw,2.85rem)] lg:text-[clamp(1.95rem,2.8vw,3.1rem)] font-black text-foreground leading-tight break-words max-w-full text-center mx-auto">
                             {stat.value}
                           </p>
                           {stat.unit && (
-                            <p className="text-xl font-medium text-muted-foreground mt-1">
+                            <p className="text-xs sm:text-sm font-medium text-muted-foreground mt-1">
                               {stat.unit}
                             </p>
                           )}
                         </div>
                       )}
-                      <p className="text-xl font-bold text-muted-foreground">
+                      <p className="text-sm sm:text-base font-bold text-muted-foreground">
                         {stat.label}
                       </p>
                     </Card>
