@@ -183,28 +183,29 @@ const StudentDetails = () => {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-white py-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          {/* زر الرجوع */}
-          <div className="mb-6">
-            <Button
-              onClick={() => navigate(`/groups/${groupId}`)}
-              variant="outline"
-              className="border-primary text-primary hover:bg-primary hover:text-white text-lg px-8 py-5"
-            >
-              <ArrowLeft className="w-5 h-5 ml-2" />
-              رجوع إلى قائمة الطلاب
-            </Button>
-          </div>
+      <div className="dashboard-scale mx-auto">
+        <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-white py-8 px-4">
+          <div className="max-w-4xl mx-auto">
+            {/* زر الرجوع */}
+            <div className="mb-6">
+              <Button
+                onClick={() => navigate(`/groups/${groupId}`)}
+                variant="outline"
+                className="border-primary text-primary hover:bg-primary hover:text-white text-lg px-8 py-5"
+              >
+                <ArrowLeft className="w-5 h-5 ml-2" />
+                رجوع إلى قائمة الطلاب
+              </Button>
+            </div>
 
-          {/* التقرير الرسمي */}
-          <div className="bg-white rounded-2xl shadow-xl border-2 border-double border-[var(--gold)] p-8">
-            {/* رأس التقرير */}
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-black text-gradient-durar mb-6">
-                تقرير أداء الطالب
-              </h1>
-              <div className="w-full h-2 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-80 mb-8" />
+            {/* التقرير الرسمي */}
+            <div className="bg-white rounded-2xl shadow-xl border-2 border-double border-[var(--gold)] p-8">
+              {/* رأس التقرير */}
+              <div className="text-center mb-8">
+                <h1 className="text-4xl font-black text-gradient-durar mb-6">
+                  تقرير أداء الطالب
+                </h1>
+                <div className="w-full h-2 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-80 mb-8" />
 
                 <div className="grid grid-cols-2 gap-6 text-right text-lg font-bold">
                   <div>
@@ -244,21 +245,11 @@ const StudentDetails = () => {
                   تقييم الوحدات الدراسية
                 </h2>
 
-              <div className="space-y-5">
-                {modules.map((module) => (
-                  <div
-                    key={module.id}
-                    className="bg-white rounded-xl shadow p-5 border border-border/30"
-                  >
-                    <div className="grid grid-cols-3 gap-4 items-center text-right">
-                      <div>
-                        <h3 className="text-xl font-black text-primary">
-                          {module.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          &nbsp;
-                        </p>
-                      </div>
+              {/* جدول التقييم */}
+              <div className="bg-gradient-to-r from-primary/5 to-[var(--gold)]/5 rounded-2xl p-6 border border-primary/20 mb-8">
+                <h2 className="text-3xl font-black text-center text-gradient-durar mb-6">
+                  تقييم الوحدات الدراسية
+                </h2>
 
                         <div className="text-center">
                           {editingId === module.id ? (
@@ -279,63 +270,82 @@ const StudentDetails = () => {
                           </p>
                         </div>
 
-                      <div className="text-right">
-                        {editingId === module.id ? (
-                          <div className="space-y-3">
-                            <Textarea
-                              value={tempRemark}
-                              onChange={(e) => setTempRemark(e.target.value)}
-                              rows={3}
-                              className="text-right text-sm"
-                              placeholder="ملاحظة الأستاذ..."
+                        <div className="text-center">
+                          {editingId === module.id ? (
+                            <Input
+                              type="number"
+                              value={tempGrade}
+                              onChange={(e) => setTempGrade(e.target.value)}
+                              className="w-24 text-3xl font-black text-center"
+                              placeholder="0-100"
                             />
-                            <div className="flex justify-end gap-2">
+                          ) : (
+                            <p className="text-5xl font-black text-primary">
+                              {module.grade ?? 0}
+                            </p>
+                          )}
+                          <p className="text-sm text-muted-foreground">
+                            من 100
+                          </p>
+                        </div>
+
+                        <div className="text-right">
+                          {editingId === module.id ? (
+                            <div className="space-y-3">
+                              <Textarea
+                                value={tempRemark}
+                                onChange={(e) => setTempRemark(e.target.value)}
+                                rows={3}
+                                className="text-right text-sm"
+                                placeholder="ملاحظة الأستاذ..."
+                              />
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleSave(module.id)}
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  <Save className="w-4 h-4 ml-1" />
+                                  حفظ
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setEditingId(null)}
+                                >
+                                  <X className="w-4 h-4" />
+                                  إلغاء
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <p className="text-sm leading-relaxed text-muted-foreground italic">
+                                {module.remark || "—"}
+                              </p>
                               <Button
                                 size="sm"
-                                onClick={() => handleSave(module.id)}
-                                className="bg-green-600 hover:bg-green-700"
+                                variant="ghost"
+                                className="mt-3 text-primary hover:text-[var(--gold)]"
+                                onClick={() =>
+                                  handleEdit(
+                                    module.id,
+                                    module.grade,
+                                    module.remark
+                                  )
+                                }
                               >
-                                <Save className="w-4 h-4 ml-1" />
-                                حفظ
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setEditingId(null)}
-                              >
-                                <X className="w-4 h-4" />
-                                إلغاء
+                                <Edit className="w-4 h-4 ml-1" />
+                                تعديل
                               </Button>
                             </div>
-                          </div>
-                        ) : (
-                          <div>
-                            <p className="text-sm leading-relaxed text-muted-foreground italic">
-                              {module.remark || "—"}
-                            </p>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="mt-3 text-primary hover:text-[var(--gold)]"
-                              onClick={() =>
-                                handleEdit(
-                                  module.id,
-                                  module.grade,
-                                  module.remark
-                                )
-                              }
-                            >
-                              <Edit className="w-4 h-4 ml-1" />
-                              تعديل
-                            </Button>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
 
               {/* المتوسط العام */}
               <div className="text-center mb-10">
@@ -350,11 +360,11 @@ const StudentDetails = () => {
                 </div>
               </div>
 
-            {/* ملاحظة الأستاذ العامة – قابلة للتعديل */}
-            <div className="bg-gradient-to-r from-primary/5 to-[var(--gold)]/5 rounded-2xl p-6 border border-primary/20 mb-10">
-              <h3 className="text-2xl font-black text-center text-gradient-durar mb-5">
-                ملاحظة الأستاذ المشرف
-              </h3>
+              {/* ملاحظة الأستاذ العامة – قابلة للتعديل */}
+              <div className="bg-gradient-to-r from-primary/5 to-[var(--gold)]/5 rounded-2xl p-6 border border-primary/20 mb-10">
+                <h3 className="text-2xl font-black text-center text-gradient-durar mb-5">
+                  ملاحظة الأستاذ المشرف
+                </h3>
 
                 {editingGeneral ? (
                   <div className="bg-white rounded-xl p-8 shadow space-y-4">

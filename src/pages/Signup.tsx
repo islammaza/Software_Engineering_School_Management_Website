@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabaseClient";
+import { useToast } from "@/hooks/use-toast";
 
 const IslamicOrnament = () => (
   <div className="w-full h-2 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-60 my-10 max-w-2xl mx-auto" />
@@ -13,6 +14,7 @@ const IslamicOrnament = () => (
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -77,7 +79,11 @@ const Signup = () => {
         .single();
 
       if (existingSchool) {
-        alert("البريد الإلكتروني مستخدم بالفعل");
+        toast({
+          title: "خطأ",
+          description: "البريد الإلكتروني مستخدم بالفعل",
+          variant: "destructive",
+        });
         setIsLoading(false);
         return;
       }
@@ -111,7 +117,10 @@ const Signup = () => {
       localStorage.setItem("adminEmail", schoolData.admin_email);
       localStorage.setItem("adminName", schoolData.admin_name);
 
-      alert("✅ تم إنشاء الحساب بنجاح!");
+      toast({
+        title: "نجح!",
+        description: "✅ تم إنشاء الحساب بنجاح!",
+      });
       navigate("/groups");
     } catch (error: any) {
       console.error('❌ Full error object:', error);

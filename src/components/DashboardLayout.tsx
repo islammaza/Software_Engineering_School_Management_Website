@@ -12,6 +12,16 @@ import {
   X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { getAdminName, logout } from "@/lib/auth";
 
 interface DashboardLayoutProps {
@@ -22,6 +32,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [adminName, setAdminName] = useState<string>("");
 
   useEffect(() => {
@@ -30,6 +41,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   }, []);
 
   const handleLogout = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const confirmLogout = () => {
     logout();
     navigate("/login");
   };
@@ -137,6 +152,31 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           {children}
         </main>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-right text-2xl font-bold">
+              تأكيد تسجيل الخروج
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-right text-lg">
+              هل أنت متأكد من رغبتك في تسجيل الخروج؟
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-start gap-3 mt-6">
+            <AlertDialogCancel className="px-6 py-2 bg-gray-100 hover:bg-gray-200">
+              إلغاء
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmLogout}
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 opacity-100"
+            >
+              نعم، تسجيل الخروج
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -16,6 +16,7 @@ const IslamicOrnament = () => (
 
 const Login = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -53,7 +54,11 @@ const Login = () => {
       console.log("Login result:", { schoolData, schoolError });
 
       if (schoolError || !schoolData) {
-        alert("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+        toast({
+          title: "خطأ في تسجيل الدخول",
+          description: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+          variant: "destructive",
+        });
         setIsLoading(false);
         return;
       }
@@ -63,7 +68,10 @@ const Login = () => {
       localStorage.setItem("adminEmail", schoolData.admin_email);
       localStorage.setItem("adminName", schoolData.admin_name);
 
-      alert(`مرحباً ${schoolData.admin_name}! 🌟`);
+      toast({
+        title: "تم تسجيل الدخول بنجاح",
+        description: `مرحباً ${schoolData.admin_name}! 🌟`,
+      });
       navigate("/groups");
     } catch (error: any) {
       console.error('❌ Login error:', error);
