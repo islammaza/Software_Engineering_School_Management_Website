@@ -363,9 +363,9 @@ const AddStudent = () => {
                   min={new Date(new Date().getFullYear() - 100, 0, 1).toISOString().split('T')[0]}
                   dir="ltr"
                 />
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                {/* <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                   <Calendar className="w-5 h-5 text-muted-foreground" />
-                </div>
+                </div> */}
               </div>
               {errors.birthdate && (
                 <p className="text-sm text-destructive flex items-center gap-1">

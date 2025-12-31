@@ -162,13 +162,13 @@ const GroupDetails = () => {
 
         {/* Group title */}
         <div className="text-center">
-          <h1 className="text-5xl sm:text-6xl font-black text-gradient-durar mb-4">
+          <h1 className="text-3xl sm:text-4xl font-black text-gradient-durar mb-3">
             {group.name}
           </h1>
-          <p className="text-2xl sm:text-3xl text-[var(--gold)] font-bold">
+          <p className="text-lg sm:text-xl text-[var(--gold)] font-bold">
             المعلم: {group.teacher_name}
           </p>
-          <div className="w-full h-3 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-80 my-12" />
+          <div className="w-full h-2 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-80 my-8" />
         </div>
 
         {/* Actions */}
@@ -201,7 +201,7 @@ const GroupDetails = () => {
 
         {/* Students list */}
         <div>
-          <h2 className="text-4xl font-black text-center mb-8 text-gradient-durar">
+          <h2 className="text-2xl font-black text-center mb-6 text-gradient-durar">
             الطلاب
           </h2>
           <div className="bg-card rounded-3xl border border-border/50 shadow-2xl overflow-hidden">
@@ -267,7 +267,7 @@ const GroupDetails = () => {
         {/* Modules list */}
         <div>
           <div className="flex items-center justify-between mb-8 max-w-4xl mx-auto">
-            <h2 className="text-4xl font-black text-gradient-durar">
+            <h2 className="text-2xl font-black text-gradient-durar">
               الوحدات الدراسية
             </h2>
             <Button

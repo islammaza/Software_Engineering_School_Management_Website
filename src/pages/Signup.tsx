@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabaseClient";
+import { useToast } from "@/hooks/use-toast";
 
 const IslamicOrnament = () => (
   <div className="w-full h-2 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-60 my-10 max-w-2xl mx-auto" />
@@ -13,6 +14,7 @@ const IslamicOrnament = () => (
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -34,7 +36,7 @@ const Signup = () => {
       passwordMismatch: formData.password !== formData.confirmPassword,
       weakPassword: formData.password.length < 6,
     };
-    
+
     setErrors(newErrors);
     return !newErrors.passwordMismatch && !newErrors.weakPassword;
   };
@@ -43,49 +45,57 @@ const Signup = () => {
   const hashPassword = async (password: string) => {
     const encoder = new TextEncoder();
     const data = encoder.encode(password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    console.log('🚀 Form submitted!');
-    
+
+    console.log("🚀 Form submitted!");
+
     if (!validateForm()) {
-      alert(errors.passwordMismatch 
-        ? "كلمتا المرور غير متطابقتين" 
-        : "كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+      toast({
+        title: "خطأ في التحقق",
+        description: errors.passwordMismatch 
+          ? "كلمتا المرور غير متطابقتين" 
+          : "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+        variant: "destructive",
+      });
       return;
     }
 
     setIsLoading(true);
 
     try {
-      console.log('Step 1: Checking if email already exists...');
-      
+      console.log("Step 1: Checking if email already exists...");
+
       // Check if email already exists
       const { data: existingSchool } = await supabase
-        .from('schools')
-        .select('admin_email')
-        .eq('admin_email', formData.email)
+        .from("schools")
+        .select("admin_email")
+        .eq("admin_email", formData.email)
         .single();
 
       if (existingSchool) {
-        alert("البريد الإلكتروني مستخدم بالفعل");
+        toast({
+          title: "خطأ",
+          description: "البريد الإلكتروني مستخدم بالفعل",
+          variant: "destructive",
+        });
         setIsLoading(false);
         return;
       }
 
-      console.log('Step 2: Hashing password...');
+      console.log("Step 2: Hashing password...");
       const hashedPassword = await hashPassword(formData.password);
-      
-      console.log('Step 3: Creating school record...');
+
+      console.log("Step 3: Creating school record...");
 
       // Create school record with hashed password
       const { data: schoolData, error: schoolError } = await supabase
-        .from('schools')
+        .from("schools")
         .insert([
           {
             name: formData.schoolName,
@@ -93,26 +103,32 @@ const Signup = () => {
             admin_name: formData.adminName,
             admin_email: formData.email,
             password_hashed: hashedPassword,
-          }
+          },
         ])
         .select()
         .single();
 
-      console.log('School insert result:', { schoolData, schoolError });
+      console.log("School insert result:", { schoolData, schoolError });
 
       if (schoolError) throw schoolError;
 
       // Store session in localStorage (simple approach)
-      localStorage.setItem('schoolId', schoolData.id);
-      localStorage.setItem('adminEmail', schoolData.admin_email);
-      localStorage.setItem('adminName', schoolData.admin_name);
+      localStorage.setItem("schoolId", schoolData.id);
+      localStorage.setItem("adminEmail", schoolData.admin_email);
+      localStorage.setItem("adminName", schoolData.admin_name);
 
-      alert("✅ تم إنشاء الحساب بنجاح!");
+      toast({
+        title: "نجح!",
+        description: "✅ تم إنشاء الحساب بنجاح!",
+      });
       navigate("/groups");
-
     } catch (error: any) {
       console.error('❌ Full error object:', error);
-      alert("❌ فشل إنشاء الحساب: " + (error.message || "حدث خطأ"));
+      toast({
+        title: "خطأ",
+        description: "❌ فشل إنشاء الحساب: " + (error.message || "حدث خطأ"),
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -121,124 +137,160 @@ const Signup = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/5 via-background to-background px-4 py-12">
       <div className="w-full max-w-2xl">
-        <div className="text-center mb-12">
-          <div className="inline-block p-8 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 quran-glow animate-float mb-8 shadow-2xl">
-            <BookOpen className="w-24 h-24 text-primary" strokeWidth={1.5} />
+        <div className="text-center mb-10">
+          <div className="inline-block p-5 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 quran-glow animate-float mb-6 shadow-2xl">
+            <BookOpen className="w-16 h-16 text-primary" strokeWidth={1.5} />
           </div>
 
-          <h1 className="text-6xl sm:text-7xl font-black bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent mb-6">
+          <h1 className="text-4xl sm:text-5xl font-black bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent mb-4">
             دار القرآن
           </h1>
 
           <IslamicOrnament />
 
-          <p className="text-2xl sm:text-3xl font-amiri italic text-gradient-durar leading-relaxed mb-4">
+          <p className="text-lg sm:text-xl font-amiri italic text-gradient-durar leading-relaxed mb-3">
             "خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ"
           </p>
-          <p className="text-lg text-muted-foreground font-bold">(رواه البخاري)</p>
+          <p className="text-base text-muted-foreground font-bold">
+            (رواه البخاري)
+          </p>
         </div>
 
-        <div className="glass-card p-10 md:p-12 rounded-3xl border border-primary/20 shadow-2xl backdrop-blur-md">
-          <h2 className="text-3xl sm:text-4xl font-black text-center mb-10 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <div className="glass-card p-6 md:p-8 rounded-2xl border border-primary/20 shadow-2xl backdrop-blur-md">
+          <h2 className="text-2xl sm:text-3xl font-black text-center mb-8 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             إنشاء حساب مدرسة جديد
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <Label htmlFor="schoolName" className="text-lg font-bold">اسم المدرسة</Label>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="schoolName" className="text-base font-bold">
+                  اسم المدرسة
+                </Label>
                 <Input
                   id="schoolName"
                   placeholder="مثال: دار تحفيظ القرآن"
                   value={formData.schoolName}
-                  onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, schoolName: e.target.value })
+                  }
                   required
                   disabled={isLoading}
-                  className="text-right text-lg h-14 border-primary/30 focus:border-primary transition-all"
+                  className="text-right text-base h-10 border-primary/30 focus:border-primary transition-all"
                 />
               </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="adminName" className="text-lg font-bold">اسم المسؤول</Label>
+              <div className="space-y-2">
+                <Label htmlFor="adminName" className="text-base font-bold">
+                  اسم المسؤول
+                </Label>
                 <Input
                   id="adminName"
                   placeholder="الاسم الكامل للمسؤول"
                   value={formData.adminName}
-                  onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, adminName: e.target.value })
+                  }
                   required
                   disabled={isLoading}
-                  className="text-right text-lg h-14 border-primary/30 focus:border-primary transition-all"
+                  className="text-right text-base h-10 border-primary/30 focus:border-primary transition-all"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <Label htmlFor="email" className="text-lg font-bold">البريد الإلكتروني</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-base font-bold">
+                  البريد الإلكتروني
+                </Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="admin@darquran.com"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   required
                   disabled={isLoading}
-                  className="text-right text-lg h-14 border-primary/30 focus:border-primary transition-all"
+                  className="text-right text-base h-10 border-primary/30 focus:border-primary transition-all"
                   dir="ltr"
                 />
               </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="phone" className="text-lg font-bold">رقم الهاتف (اختياري)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="text-base font-bold">
+                  رقم الهاتف (اختياري)
+                </Label>
                 <Input
                   id="phone"
                   type="tel"
                   placeholder="966xxxxxxxxx"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
                   disabled={isLoading}
-                  className="text-right text-lg h-14 border-primary/30 focus:border-primary transition-all"
+                  className="text-right text-base h-10 border-primary/30 focus:border-primary transition-all"
                   dir="ltr"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <Label htmlFor="password" className="text-lg font-bold">كلمة المرور</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-base font-bold">
+                  كلمة المرور
+                </Label>
                 <Input
                   id="password"
                   type="password"
                   placeholder="••••••••"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   required
                   disabled={isLoading}
-                  className={`text-right text-lg h-14 border-primary/30 focus:border-primary transition-all ${
-                    errors.weakPassword ? 'border-red-500' : ''
+                  className={`text-right text-base h-10 border-primary/30 focus:border-primary transition-all ${
+                    errors.weakPassword ? "border-red-500" : ""
                   }`}
                 />
                 {errors.weakPassword && (
-                  <p className="text-red-500 text-sm text-right">كلمة المرور يجب أن تكون 6 أحرف على الأقل</p>
+                  <p className="text-red-500 text-xs text-right">
+                    كلمة المرور يجب أن تكون 6 أحرف على الأقل
+                  </p>
                 )}
               </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="confirmPassword" className="text-lg font-bold">تأكيد كلمة المرور</Label>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="confirmPassword"
+                  className="text-base font-bold"
+                >
+                  تأكيد كلمة المرور
+                </Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   placeholder="••••••••"
                   value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      confirmPassword: e.target.value,
+                    })
+                  }
                   required
                   disabled={isLoading}
-                  className={`text-right text-lg h-14 border-primary/30 focus:border-primary transition-all ${
-                    errors.passwordMismatch ? 'border-red-500' : ''
+                  className={`text-right text-base h-10 border-primary/30 focus:border-primary transition-all ${
+                    errors.passwordMismatch ? "border-red-500" : ""
                   }`}
                 />
                 {errors.passwordMismatch && (
-                  <p className="text-red-500 text-sm text-right">كلمتا المرور غير متطابقتين</p>
+                  <p className="text-red-500 text-xs text-right">
+                    كلمتا المرور غير متطابقتين
+                  </p>
                 )}
               </div>
             </div>
@@ -247,11 +299,11 @@ const Signup = () => {
               type="submit"
               size="lg"
               disabled={isLoading}
-              className="w-full text-2xl py-8 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold shadow-2xl hover:shadow-[var(--gold)]/40 transition-all duration-500 disabled:opacity-50"
+              className="w-full text-base py-5 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold shadow-2xl hover:shadow-[var(--gold)]/40 transition-all duration-500 disabled:opacity-50"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   جاري إنشاء الحساب...
                 </>
               ) : (
@@ -263,7 +315,10 @@ const Signup = () => {
           <div className="mt-10 text-center">
             <p className="text-lg text-muted-foreground">
               لديك حساب بالفعل؟{" "}
-              <Link to="/login" className="text-primary font-bold hover:text-[var(--gold)] transition-all text-xl">
+              <Link
+                to="/login"
+                className="text-primary font-bold hover:text-[var(--gold)] transition-all text-xl"
+              >
                 تسجيل الدخول
               </Link>
             </p>

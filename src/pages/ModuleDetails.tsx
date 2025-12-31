@@ -136,7 +136,7 @@ const ModuleDetails = () => {
           </div>
 
           {/* Student assessments */}
-          <div className="bg-white rounded-2xl shadow-xl border-2 border-double border-[var(--gold)] p-8">
+          <div className="bg-white rounded-2xl shadow-xl border-2 border-double border-[var(--gold)] p-5">
             {loading ? (
               <div className="text-center py-8 text-muted-foreground">
                 جاري تحميل البيانات...
@@ -239,7 +239,7 @@ const ModuleDetails = () => {
           {/* آية في الأسفل */}
           <div className="text-center py-16 mt-12">
             <div className="w-full h-2 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-80 my-10 max-w-xl mx-auto" />
-            <p className="text-3xl font-amiri italic text-gradient-durar leading-relaxed max-w-4xl mx-auto px-6">
+            <p className="text-lg font-amiri italic text-gradient-durar leading-relaxed max-w-4xl mx-auto px-4">
               "وَمَنْ يَتَّقِ اللَّهَ يَجْعَلْ لَهُ مَخْرَجًا ۝ وَيَرْزُقْهُ
               مِنْ حَيْثُ لَا يَحْتَسِبُ"
             </p>
