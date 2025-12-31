@@ -245,19 +245,28 @@ const StudentDetails = () => {
                   تقييم الوحدات الدراسية
                 </h2>
 
-                <div className="space-y-5">
-                  {modules.map((module) => (
-                    <div
-                      key={module.id}
-                      className="bg-white rounded-xl shadow p-5 border border-border/30"
-                    >
-                      <div className="grid grid-cols-3 gap-4 items-center text-right">
-                        <div>
-                          <h3 className="text-xl font-black text-primary">
-                            {module.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            &nbsp;
+              {/* جدول التقييم */}
+              <div className="bg-gradient-to-r from-primary/5 to-[var(--gold)]/5 rounded-2xl p-6 border border-primary/20 mb-8">
+                <h2 className="text-3xl font-black text-center text-gradient-durar mb-6">
+                  تقييم الوحدات الدراسية
+                </h2>
+
+                        <div className="text-center">
+                          {editingId === module.id ? (
+                            <Input
+                              type="number"
+                              value={tempGrade}
+                              onChange={(e) => setTempGrade(e.target.value)}
+                              className="w-24 text-3xl font-black text-center"
+                              placeholder="0-100"
+                            />
+                          ) : (
+                            <p className="text-5xl font-black text-primary">
+                              {module.grade ?? 0}
+                            </p>
+                          )}
+                          <p className="text-sm text-muted-foreground">
+                            من 100
                           </p>
                         </div>
 

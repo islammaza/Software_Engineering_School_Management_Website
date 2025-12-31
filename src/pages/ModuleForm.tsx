@@ -134,7 +134,7 @@ const ModuleForm = () => {
                 <ArrowRight className="w-5 h-5" />
               </Button>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold">
+                <h1 className="text-lg sm:text-2xl font-bold">
                   {isEditMode ? "تعديل الوحدة" : "إضافة وحدة جديدة"}
                 </h1>
                 <p className="text-muted-foreground">
