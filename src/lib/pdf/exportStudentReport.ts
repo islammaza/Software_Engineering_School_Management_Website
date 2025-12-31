@@ -229,11 +229,12 @@ export async function exportStudentReportPdf(studentId: string) {
   const contentWidth = pageOrientation === "portrait" ? 515 : 760;
 
   // Table body – hard cap on number of displayed modules to enforce single-page layout
+  // Arabic layout: Module name (right), Mark (center), Note (left)
   const tableBody: any[] = [
     [
-      { text: rtl("الوحدة"), style: "tableHeader", alignment: "right" },
-      { text: rtl("الدرجة"), style: "tableHeader", alignment: "center" },
       { text: rtl("ملاحظة"), style: "tableHeader", alignment: "right" },
+      { text: rtl("الدرجة"), style: "tableHeader", alignment: "center" },
+      { text: rtl("الوحدة"), style: "tableHeader", alignment: "right" },
     ],
   ];
   const maxModulesDisplayed = pageOrientation === "portrait" ? 10 : 16;
@@ -241,9 +242,9 @@ export async function exportStudentReportPdf(studentId: string) {
   displayedModules.forEach((mod) => {
     const assess = data.assessments.find((a) => a.module_id === mod.id);
     tableBody.push([
-      { text: rtl(mod.name), style: "cell", alignment: "right" },
-      { text: assess?.score != null ? assess.score.toString() : "—", style: "cell", alignment: "center" },
       { text: rtl(assess?.remark ?? "—"), style: "cell", alignment: "right" },
+      { text: assess?.score != null ? assess.score.toString() : "—", style: "cell", alignment: "center" },
+      { text: rtl(mod.name), style: "cell", alignment: "right" },
     ]);
   });
   const hiddenModulesCount = Math.max(0, data.modules.length - maxModulesDisplayed);
