@@ -1,5 +1,5 @@
 // src/pages/Signup.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BookOpen, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabaseClient";
 import { useToast } from "@/hooks/use-toast";
+import { isAuthenticated } from "@/lib/auth";
 
 const IslamicOrnament = () => (
   <div className="w-full h-2 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-60 my-10 max-w-2xl mx-auto" />
@@ -30,6 +31,13 @@ const Signup = () => {
     passwordMismatch: false,
     weakPassword: false,
   });
+
+  // Redirect to groups if already authenticated
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate("/groups", { replace: true });
+    }
+  }, [navigate]);
 
   const validateForm = () => {
     const newErrors = {
