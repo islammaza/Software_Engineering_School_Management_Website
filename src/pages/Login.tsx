@@ -1,5 +1,5 @@
 // src/pages/Login.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BookOpen, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabaseClient";
 import { useToast } from "@/hooks/use-toast";
+import { isAuthenticated } from "@/lib/auth";
 
 
 
@@ -23,6 +24,19 @@ const Login = () => {
     email: "",
     password: "",
   });
+
+  // Redirect to groups if already authenticated
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate("/groups", { replace: true });
+    }
+    
+    // Prevent caching of this page
+    window.history.pushState(null, '', window.location.href);
+    window.onpopstate = function() {
+      window.history.pushState(null, '', window.location.href);
+    };
+  }, [navigate]);
 
   // Must match Signup hash
   const hashPassword = async (password: string) => {
@@ -72,7 +86,9 @@ const Login = () => {
         title: "تم تسجيل الدخول بنجاح",
         description: `مرحباً ${schoolData.admin_name}! 🌟`,
       });
-      navigate("/groups");
+      
+      // Use replace to prevent back button issues
+      navigate("/groups", { replace: true });
     } catch (error: any) {
       console.error('❌ Login error:', error);
       toast({

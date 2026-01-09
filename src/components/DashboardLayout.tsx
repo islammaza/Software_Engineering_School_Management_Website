@@ -46,7 +46,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   const confirmLogout = () => {
     logout();
-    navigate("/login");
+    // Use replace to prevent back button from returning to protected pages
+    navigate("/", { replace: true });
+    // Force reload to clear any cached state
+    window.location.href = "/";
   };
 
   const navItems = [
