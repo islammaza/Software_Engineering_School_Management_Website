@@ -1,15 +1,25 @@
 // Authentication helper functions
 
+const getLocalStorage = (): Storage | null => {
+  if (typeof window === "undefined") return null;
+  return window.localStorage;
+};
+
+const getSessionStorage = (): Storage | null => {
+  if (typeof window === "undefined") return null;
+  return window.sessionStorage;
+};
+
 export function getSchoolId(): string | null {
-  return localStorage.getItem('schoolId');
+  return getLocalStorage()?.getItem('schoolId') ?? null;
 }
 
 export function getAdminEmail(): string | null {
-  return localStorage.getItem('adminEmail');
+  return getLocalStorage()?.getItem('adminEmail') ?? null;
 }
 
 export function getAdminName(): string | null {
-  return localStorage.getItem('adminName');
+  return getLocalStorage()?.getItem('adminName') ?? null;
 }
 
 export function isAuthenticated(): boolean {
@@ -17,14 +27,17 @@ export function isAuthenticated(): boolean {
 }
 
 export function logout() {
+  const local = getLocalStorage();
+  const session = getSessionStorage();
+
   // Clear all authentication data
-  localStorage.removeItem('schoolId');
-  localStorage.removeItem('adminEmail');
-  localStorage.removeItem('adminName');
+  local?.removeItem('schoolId');
+  local?.removeItem('adminEmail');
+  local?.removeItem('adminName');
   
   // Clear any other cached data
-  localStorage.clear();
-  sessionStorage.clear();
+  local?.clear();
+  session?.clear();
   
   // Prevent browser back button from accessing cached pages
   window.history.pushState(null, '', window.location.href);

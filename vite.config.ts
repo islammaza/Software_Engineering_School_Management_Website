@@ -16,4 +16,17 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./src/test/setup.ts"],
+    environmentOptions: {
+      jsdom: {
+        url: "http://localhost/",
+      },
+    },
+    css: true,
+    restoreMocks: true,
+    clearMocks: true,
+  },
 }));
