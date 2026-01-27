@@ -1,0 +1,65 @@
+FRONTEND TECHNICAL DECISIONS
+
+Project: School Management Website (React + Vite)
+Last updated: 2026-01-26
+
+1) Framework & Build Tooling
+- Decision: React 18 + TypeScript + Vite.
+- Rationale: Fast dev server and build times; excellent TS support; simple config; fits SPA routing.
+- Tradeoffs: SSR is not included; SEO relies on SPA patterns.
+
+2) Routing
+- Decision: React Router (v6).
+- Rationale: Well-known SPA routing with nested routes and route protection support.
+- Implementation: Protected pages are wrapped using the `ProtectedRoute` component.
+- Tradeoffs: Route-level data loading is handled in components rather than router loaders.
+
+3) Data Fetching and Caching
+- Decision: TanStack Query (React Query).
+- Rationale: Standard approach for server-state caching, invalidation, loading/error states.
+- Implementation: A single `QueryClient` is created in `App.tsx` and provided via `QueryClientProvider`.
+
+4) UI System
+- Decision: Tailwind CSS + shadcn/ui (Radix UI primitives).
+- Rationale: Rapid iteration with consistent design tokens, accessible primitives, and component reuse.
+- Implementation notes:
+  - Class merging uses `cn()` (clsx + tailwind-merge).
+  - UI components live under `src/components/ui`.
+- Tradeoffs: Tailwind class-heavy markup; requires discipline for consistency.
+
+5) Language / RTL
+- Decision: Arabic-first UI with right-to-left patterns where appropriate.
+- Rationale: Intended user base and clarity.
+- Implementation: Components/pages include Arabic copy; some inputs use `dir="ltr"` when needed.
+- Tradeoffs: Full i18n is not implemented (no translation catalog yet).
+
+6) Client-side Session
+- Decision: Use localStorage-based session keys (e.g., `schoolId`) to guard routes.
+- Rationale: Simple approach for an educational/project setup, avoids complex token refresh flows.
+- Implementation: `src/lib/auth.ts` provides `isAuthenticated`, `logout`, etc.
+- Tradeoffs: Not as secure as server-issued sessions/JWT; susceptible to XSS if introduced.
+
+7) Error Feedback / Notifications
+- Decision: Toast-based UX for user feedback.
+- Rationale: Non-blocking notifications and consistent messaging.
+
+8) Testing Strategy
+- Decision: Vitest + React Testing Library + jsdom; MSW for integration-style tests.
+- Rationale: Best fit for Vite; encourages testing behavior instead of implementation.
+- Scope:
+  - Unit tests for helpers (auth, utils)
+  - Component-level integration tests (ProtectedRoute)
+  - API layer unit tests (supabase query building)
+
+9) Project Structure
+- Decision:
+  - `src/pages`: route-level screens
+  - `src/components`: shared components/layout
+  - `src/lib/api`: data access functions
+  - `src/lib`: shared utilities (auth, supabaseClient)
+- Rationale: Keeps UI, routing, and data access concerns separated.
+
+10) Known Limitations / Future Improvements
+- Introduce full i18n (e.g., i18next) if multi-language is needed.
+- Improve session handling using Supabase Auth or server-issued tokens.
+- Add E2E tests (Playwright/Cypress) for full user flows (signup/login/add group/student).

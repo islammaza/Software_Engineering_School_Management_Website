@@ -37,6 +37,12 @@ export type GradeBin = {
   percentage: number;
 };
 
+export type GroupGradeDistribution = {
+  group_id: string;
+  group_name: string;
+  bins: GradeBin[];
+};
+
 /**
  * Utility to get groups IDs for a specific school (or all schools when schoolId undefined)
  */
@@ -401,17 +407,88 @@ export async function getGradeDistribution(schoolId?: string) {
 }
 
 /**
+ * Grade distribution per group within the given school
+ */
+export async function getGroupGradeDistributions(schoolId?: string) {
+  try {
+    const groupIds = await getGroupIdsForSchool(schoolId);
+    if (groupIds.length === 0) return { data: [] as GroupGradeDistribution[], error: null };
+
+    const [{ data: groups, error: groupsError }, { data: students, error: studentsError }] = await Promise.all([
+      supabase.from("groups").select("id, name").in("id", groupIds),
+      supabase.from("students").select("id, group_id").in("group_id", groupIds),
+    ]);
+    if (groupsError) throw groupsError;
+    if (studentsError) throw studentsError;
+
+    const studentIds = (students ?? []).map((s: any) => s.id);
+    if (studentIds.length === 0) return { data: [] as GroupGradeDistribution[], error: null };
+
+    const { data: reports, error: reportsError } = await supabase
+      .from("student_reports")
+      .select("student_id, final_note")
+      .in("student_id", studentIds);
+    if (reportsError) throw reportsError;
+
+    const groupMap = new Map((groups ?? []).map((g: any) => [g.id, g.name]));
+    const studentToGroup = new Map((students ?? []).map((s: any) => [s.id, s.group_id]));
+
+    const templateBins = () => ([
+      { label: "90-100", min: 90, max: 100, count: 0, percentage: 0 },
+      { label: "80-89", min: 80, max: 89.999, count: 0, percentage: 0 },
+      { label: "70-79", min: 70, max: 79.999, count: 0, percentage: 0 },
+      { label: "60-69", min: 60, max: 69.999, count: 0, percentage: 0 },
+      { label: "50-59", min: 50, max: 59.999, count: 0, percentage: 0 },
+      { label: "<50", min: 0, max: 49.999, count: 0, percentage: 0 },
+    ] as GradeBin[]);
+
+    const groupBins = new Map<string, GradeBin[]>(groupIds.map((gid) => [gid, templateBins()]));
+    const groupCounts = new Map<string, number>(groupIds.map((gid) => [gid, 0]));
+
+    (reports ?? []).forEach((r: any) => {
+      const note = r.final_note !== null ? Number(r.final_note) : null;
+      if (note === null) return;
+      const gid = studentToGroup.get(r.student_id);
+      if (!gid) return;
+      const bins = groupBins.get(gid) ?? templateBins();
+      const bin = bins.find((b) => note >= b.min && note <= b.max);
+      if (bin) bin.count += 1;
+      groupBins.set(gid, bins);
+      groupCounts.set(gid, (groupCounts.get(gid) || 0) + 1);
+    });
+
+    const results: GroupGradeDistribution[] = groupIds.map((gid) => {
+      const bins = groupBins.get(gid) ?? templateBins();
+      const total = groupCounts.get(gid) || 0;
+      bins.forEach((b) => {
+        b.percentage = total ? Number(((b.count / total) * 100).toFixed(1)) : 0;
+      });
+      return {
+        group_id: gid,
+        group_name: groupMap.get(gid) || "مجموعة",
+        bins,
+      };
+    }).filter((g) => (g.bins?.some((b) => b.count > 0)) || (groupCounts.get(g.group_id) || 0) > 0);
+
+    return { data: results, error: null };
+  } catch (error) {
+    return { data: null, error };
+  }
+}
+
+/**
  * Combined helper to fetch all dashboard data in one request
  */
 export async function getFullDashboard(schoolId?: string) {
   try {
-    const [statsRes, topRes, needsRes, groupsRes, modulesRes, distributionRes] = await Promise.all([
+    const [statsRes, topRes, needsRes, groupsRes, modulesRes, distributionRes, groupDistRes] = await Promise.all([
       getDashboardStats(schoolId),
       getTopMemorizers(schoolId, 4),
       getNeedsAttention(schoolId, 10),
       getGroupAverages(schoolId),
       getModuleAverages(schoolId),
       getGradeDistribution(schoolId),
+      getGroupGradeDistributions(schoolId),
     ]);
 
     if (statsRes.error) throw statsRes.error;
@@ -420,6 +497,7 @@ export async function getFullDashboard(schoolId?: string) {
     if (groupsRes.error) throw groupsRes.error;
     if (modulesRes.error) throw modulesRes.error;
     if (distributionRes.error) throw distributionRes.error;
+    if (groupDistRes.error) throw groupDistRes.error;
 
     const moduleData = modulesRes.data ?? [];
     const topModules = moduleData.slice(0, 3);
@@ -435,6 +513,7 @@ export async function getFullDashboard(schoolId?: string) {
         topModules,
         bottomModules,
         gradeDistribution: distributionRes.data,
+        groupGradeDistributions: groupDistRes.data,
       },
       error: null,
     };
@@ -450,5 +529,6 @@ export default {
   getGroupAverages,
   getModuleAverages,
   getGradeDistribution,
+  getGroupGradeDistributions,
   getFullDashboard,
 };

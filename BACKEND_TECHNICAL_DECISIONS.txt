@@ -1,0 +1,74 @@
+BACKEND TECHNICAL DECISIONS
+
+Project: School Management Website (Supabase-backed)
+Last updated: 2026-01-26
+
+Important note:
+- This repository is primarily a frontend SPA.
+- “Backend” in this project is a Backend-as-a-Service (BaaS) provided by Supabase (PostgreSQL + APIs).
+
+1) Backend Platform
+- Decision: Supabase (Postgres + REST/RPC via supabase-js).
+- Rationale:
+  - Rapid development without building a dedicated API server.
+  - Strong relational DB with familiar SQL semantics.
+  - Good TypeScript client and predictable CRUD patterns.
+- Tradeoffs:
+  - Vendor lock-in for hosting/managed services.
+  - Some business rules may end up duplicated in the client if not enforced at DB level.
+
+2) Data Access Pattern
+- Decision: Direct DB access from the client via `@supabase/supabase-js`.
+- Implementation:
+  - Client is configured in `src/lib/supabaseClient.ts`.
+  - CRUD functions are grouped under `src/lib/api/*` (students, groups, modules, etc.).
+- Rationale: Centralizes query logic and keeps UI components cleaner.
+- Tradeoffs: Security depends heavily on Supabase policies (RLS) and key management.
+
+3) Authentication Model (Current)
+- Decision: Custom login using a hashed password field stored in the database; session stored in localStorage.
+- Implementation:
+  - Login hashes password (SHA-256) and queries the `schools` table for matching credentials.
+  - On success it stores `schoolId`, `adminEmail`, and `adminName` in localStorage.
+- Rationale: Simple and easy to reason about for a project setting.
+- Tradeoffs / Risks:
+  - Not equivalent to a hardened auth system.
+  - Hashing alone is not ideal without salt/slow hashing (bcrypt/argon2).
+  - Storing session identifiers in localStorage is less secure than httpOnly cookies.
+
+4) Authorization & Data Isolation
+- Intended decision: School-level isolation (data partitioned by `schoolId` or equivalent).
+- Recommendation:
+  - Enable Row Level Security (RLS) on tables.
+  - Enforce that users can only access rows belonging to their school.
+- Tradeoffs: Requires careful policy design and testing.
+
+5) Database Schema Direction (Inferred)
+- Entities are modeled relationally (e.g., groups, students, modules).
+- Typical relationships:
+  - Group has many Students (group_id foreign key).
+  - Group has many Modules.
+- Rationale: Relational design supports reporting and constraints.
+
+6) Business Rules
+- Decision: Some validation is implemented client-side (e.g., duplicate student checks).
+- Example: Student duplicates are checked by (name + phone + birthdate) within the same group.
+- Tradeoffs:
+  - Client-side checks can race; DB-level unique constraints are more robust.
+- Recommendation:
+  - Add a unique constraint/index (where appropriate) in Postgres to guarantee correctness.
+
+7) Error Handling
+- Decision: API helpers return `{ data, error }` patterns from Supabase.
+- Rationale: Predictable flow in UI pages; aligns with supabase-js.
+
+8) Secrets and Keys
+- Decision: Supabase anon key is used by the client.
+- Important:
+  - The anon key is expected to be public, but you MUST rely on RLS policies to secure data.
+  - For production, prefer environment variables rather than hard-coding keys.
+
+9) Future Improvements
+- Migrate auth to Supabase Auth (email/password) or a dedicated backend.
+- Add DB migrations and schema management (Supabase migrations) tracked in repo.
+- Add integration tests against a local Supabase stack (optional) or use contract tests for API helpers.

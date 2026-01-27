@@ -8,11 +8,25 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    open: '/index.html',
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./src/test/setup.ts"],
+    environmentOptions: {
+      jsdom: {
+        url: "http://localhost/",
+      },
+    },
+    css: true,
+    restoreMocks: true,
+    clearMocks: true,
   },
 }));
