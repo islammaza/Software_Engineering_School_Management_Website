@@ -8,12 +8,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabaseClient";
 import { useToast } from "@/hooks/use-toast";
 import { isAuthenticated } from "@/lib/auth";
-
-
-
-const IslamicOrnament = () => (
-  <div className="w-full h-2 bg-gradient-to-r from-transparent via-primary to-transparent opacity-60 my-8" />
-);
+import { IslamicOrnament } from "@/components/shared/IslamicOrnament";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -113,7 +108,7 @@ const Login = () => {
             دار القرآن
           </h1>
 
-          <IslamicOrnament />
+          <IslamicOrnament className="my-8" />
 
           <p className="text-lg text-muted-foreground font-medium leading-relaxed">
             بِسْمِ اللهِ الرَّحْمَنِ الرَّحِيمِ

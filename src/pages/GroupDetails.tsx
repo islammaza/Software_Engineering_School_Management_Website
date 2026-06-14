@@ -1,7 +1,7 @@
 // src/pages/GroupDetails.tsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Plus, Edit, Trash2, ArrowLeft, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

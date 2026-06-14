@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Users, Clock, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getGroupsBySchool, Group } from "@/lib/api/groups";

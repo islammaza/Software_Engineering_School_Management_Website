@@ -4,10 +4,7 @@ import { Link } from "react-router-dom";
 import { BookOpen, Users, TrendingUp, Award, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-
-const IslamicOrnament = () => (
-  <div className="w-full h-3 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent opacity-80 my-12" />
-);
+import { IslamicOrnament } from "@/components/shared/IslamicOrnament";
 
 const Landing = () => {
   useEffect(() => {
@@ -46,7 +43,7 @@ const Landing = () => {
             دار القرآن الكريم
           </motion.h1>
 
-          <IslamicOrnament />
+          <IslamicOrnament tone="gold" className="h-3 opacity-80 my-12" />
 
           <motion.p
             initial={{ opacity: 0 }}

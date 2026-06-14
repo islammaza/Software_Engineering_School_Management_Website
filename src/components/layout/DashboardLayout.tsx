@@ -1,4 +1,4 @@
-// src/components/DashboardLayout.tsx
+// src/components/layout/DashboardLayout.tsx
 import { ReactNode } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";

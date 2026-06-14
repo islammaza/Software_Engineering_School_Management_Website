@@ -1,7 +1,7 @@
 // src/pages/StudentDetails.tsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { FileDown, ArrowLeft, Save, X, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

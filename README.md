@@ -1,29 +1,121 @@
-# School Management Website
+# Quran School Management Website
 
-A React + Vite web app for managing a school/group workflow (groups, students, modules, dashboard). The UI is Arabic-first.
+An Arabic-first school management platform built with React, Vite, TypeScript, Tailwind CSS, and Supabase. The app is designed for Quran schools and memorization centers that need a clean way to manage groups, students, study modules, performance reports, and admin access from one place.
 
-## Features
+## Why This Project Stands Out
 
-- Authentication (Signup/Login) with a simple local session
-- Groups management (list, add, edit, details)
-- Students management inside a group (add, edit, details)
-- Modules management inside a group (add/edit/details)
-- Dashboard + Settings
+- Built for real Quran-school workflows, not a generic dashboard clone
+- Arabic-first interface with a polished, modern visual style
+- Role-based protected areas for authenticated admin users
+- Group, student, and module management in one connected flow
+- Dashboard analytics that make progress easy to understand at a glance
+- PDF report generation for student records and summaries
+- Responsive layout that works well on desktop and mobile
+- Supabase-backed data layer with test coverage around core utilities
+
+## Main Functionalities
+
+### Authentication
+
+- Signup and login screens for school administrators
+- Simple local session handling after successful authentication
+- Protected routes that block access to internal pages when the user is not signed in
+
+### School and Group Management
+
+- Create, edit, and view groups
+- Browse all groups from a central groups page
+- Open group details to manage related data in context
+
+### Student Management
+
+- Add students directly to a group
+- Edit and view student profiles
+- Detect duplicate students using identity fields in the current group
+- Export student reports as PDF for sharing or archiving
+
+### Module Management
+
+- Add learning modules to a group
+- Edit module information and assessments
+- View module-specific details and progress
+
+### Dashboard and Insights
+
+- High-level school overview
+- Student and group performance metrics
+- Module averages and grade distribution charts
+- Highlight top performers and students who need follow-up
+
+### Settings and Session Controls
+
+- Update admin-facing settings
+- Log out cleanly and clear cached session data
 
 ## Tech Stack
 
-- React 18 + TypeScript
+- React 18
+- TypeScript
 - Vite
 - React Router
 - TanStack Query
-- Supabase (data)
-- Tailwind + shadcn/ui
+- Supabase
+- Tailwind CSS
+- shadcn/ui
+- Recharts
+- Vitest and React Testing Library
 
-## Getting Started (Developers)
+## Project Structure
+
+The repo is organized to keep the app easier to scan and maintain:
+
+```text
+src/
+  app/            application shell and route setup
+  components/
+    auth/           protected route guards
+    layout/         dashboard shell and navigation layout
+    shared/         reusable decorative or cross-screen components
+    ui/             shadcn/ui components
+  hooks/
+  lib/
+    api/            data access helpers
+    pdf/            PDF export utilities
+    auth.ts         session helpers
+    supabaseClient.ts
+  pages/            route-level screens
+  test/             MSW and test setup
+public/             static assets, fonts, icons, robots file
+```
+
+## Routes
+
+Public routes:
+
+- `/` landing page
+- `/login`
+- `/signup`
+
+Protected routes:
+
+- `/dashboard`
+- `/groups`
+- `/groups/add`
+- `/groups/:id`
+- `/groups/:id/edit`
+- `/groups/:groupId/students/add`
+- `/groups/:groupId/students/:studentId`
+- `/groups/:groupId/students/:studentId/edit`
+- `/groups/:id/modules/add`
+- `/groups/:id/modules/:moduleId`
+- `/groups/:id/modules/:moduleId/edit`
+- `/settings`
+
+## Getting Started
 
 ### Requirements
 
-- Node.js (recommended LTS)
+- Node.js 18 or newer
 - npm
 
 ### Install
@@ -32,21 +124,34 @@ A React + Vite web app for managing a school/group workflow (groups, students, m
 npm install
 ```
 
-### Run (development)
+### Environment Variables
+
+Create a local `.env` file based on the included example:
+
+```bash
+cp .env.example .env
+```
+
+Set the following values:
+
+```bash
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-public-anon-key
+```
+
+### Run the App
 
 ```bash
 npm run dev
 ```
 
-Vite will start the app (configured to use port 8080).
-
-### Build
+### Build for Production
 
 ```bash
 npm run build
 ```
 
-### Preview production build
+### Preview the Production Build
 
 ```bash
 npm run preview
@@ -54,92 +159,42 @@ npm run preview
 
 ## Testing
 
-This project uses **Vitest** + **React Testing Library** for unit and integration tests.
+This project uses Vitest and React Testing Library.
 
 ```bash
-# watch mode
 npm test
-
-# CI mode
 npm run test:run
-
-# UI runner
 npm run test:ui
-
-# coverage
 npm run test:coverage
 ```
 
-## User Guide (Admin)
+## Testing Notes
 
-This guide describes the typical workflow for an admin user.
+- The current test setup includes MSW-based server mocks
+- Core helpers such as auth utilities and student API logic already have tests
+- If you add new flows, keep the test coverage close to the user journey
 
-### 1) Create an account (Signup)
+## File Layout Highlights
 
-1. Open the app.
-2. Go to **إنشاء حساب جديد**.
-3. Enter admin details and submit.
-4. After a successful signup, proceed to login.
+- `src/app/App.tsx` owns the route tree
+- `src/components/layout/DashboardLayout.tsx` wraps protected admin pages
+- `src/components/auth/ProtectedRoute.tsx` guards authenticated routes
+- `src/components/shared/IslamicOrnament.tsx` centralizes the decorative separator used on branding screens
+- `src/lib/supabaseClient.ts` now reads from environment variables with safe fallbacks
 
-### 2) Login
+## Deployment Ready Notes
 
-1. Open **تسجيل الدخول**.
-2. Enter email + password.
-3. After successful login you will be redirected to **Groups**.
+- The project title and meta tags are set for a public GitHub presence
+- Supabase credentials are configurable through environment variables
+- Static assets, icons, and fonts are already organized under `public/`
+- The app is suitable for Vercel or any other Vite-compatible hosting platform
 
-Tip: If you are already logged in, visiting `/login` will redirect you to `/groups`.
+## Suggested Next Improvements
 
-### 3) Groups
+- Replace local session storage with a more secure auth strategy
+- Move the remaining page groupings into feature-based folders if you want even stricter separation
+- Add screenshots or a short demo GIF to make the GitHub page more persuasive
 
-- View all groups from the Groups page.
-- Add a group: open “Add Group” and submit the form.
-- Open a group: click a group to view **Group Details**.
-- Edit a group: use the edit action on the group.
+## License
 
-### 4) Students (inside a group)
-
-From **Group Details**:
-
-- Add a student: open “Add Student”, fill the form, and submit.
-- View student: open the student details page.
-- Edit student: open “Edit Student” and update fields.
-
-Notes:
-
-- The system checks duplicates using (name + phone + birthdate) within the same group.
-
-### 5) Modules (inside a group)
-
-From **Group Details**:
-
-- Add a module: open “Add Module” and submit.
-- Edit a module: open “Edit Module” and submit.
-- View module details: open the module details page.
-
-### 6) Dashboard
-
-- Open **Dashboard** to view high-level information and quick navigation.
-
-### 7) Settings & Logout
-
-- Open **Settings** to manage admin preferences.
-- To logout, use the logout action (it clears local session data).
-
-## App Routes (Reference)
-
-Common routes:
-
-- `/` Landing
-- `/login` Login
-- `/signup` Signup
-- `/groups` Groups (protected)
-- `/groups/:id` Group details (protected)
-- `/groups/:groupId/students/:studentId` Student details (protected)
-- `/groups/:id/modules/:moduleId` Module details (protected)
-- `/dashboard` Dashboard (protected)
-- `/settings` Settings (protected)
-
-## Troubleshooting
-
-- If you see a blank page after login, clear site data (localStorage) and login again.
-- If build/test fails, run `npm install` again and retry.
+No license has been added yet. If you plan to publish the repository publicly, add one before sharing it widely.

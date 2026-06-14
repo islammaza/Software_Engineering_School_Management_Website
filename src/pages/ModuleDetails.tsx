@@ -1,7 +1,7 @@
 // src/pages/ModuleDetails.tsx
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { ArrowRight, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

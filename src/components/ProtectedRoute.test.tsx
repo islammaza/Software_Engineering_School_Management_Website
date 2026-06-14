@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import ProtectedRoute from "./ProtectedRoute";
+import ProtectedRoute from "./auth/ProtectedRoute";
 import { isAuthenticated } from "@/lib/auth";
 
 vi.mock("@/lib/auth", () => ({
